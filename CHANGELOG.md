@@ -2,7 +2,7 @@
 
 ### Added
 - Added metadata to gemspec.
-- Added document to Surface class.
+- Added document to Error, Platform, SDL, Surface, Timer, and Version.
 
 ### Changed
 
