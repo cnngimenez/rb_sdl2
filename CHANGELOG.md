@@ -5,6 +5,7 @@
 - Added document to Error, Platform, SDL, Surface, Timer, and Version.
 
 ### Changed
+- Palette#inspect
 
 ### Deprecated
 

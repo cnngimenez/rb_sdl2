@@ -57,6 +57,10 @@ module RbSDL2
 
     def each = length.times { |nth| yield(self[nth]) }
 
+    def inspect
+      "#<#{self.class.name} ptr=#{to_ptr.inspect} colors=#{length} version=#{version}>"
+    end
+
     def length = @st[:ncolors]
 
     alias size length
