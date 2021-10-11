@@ -30,8 +30,13 @@ module RbSDL2
     require_relative 'pixel_format_enum'
 
     class << self
-      # 変換ができない場合はエラーを発生させる。
-      # 変換先がインデックスカラー（INDEX8）の時は期待する変換は行われない。
+      # 指定した Surface オブジェクトを基に指定した画像フォーマットの新しい Surface オブジェクトを柵瀬します。
+      # surface へ変換元の Surface オブジェクトを与えます。
+      # new_format へ変換先の画像フォーマット(PixelFormatEnumの名前か番号)を与えます。
+      # 変換ができない場合は例外（RbSDL2::RbSDL2Error）を発生させます。
+      # INDEX1*, INDEX4*, ARGB2101010、FOURCC系への変換はできません。
+      # 変換先がインデックスカラー（INDEX8）の時は例外は発生しませんが期待する変換は行われません。
+      # その時はサーフェィス全面がインデックス番号０で埋められています。
       def convert(surface, new_format)
         ptr = SurfacePointer.new(
           ::SDL2.SDL_ConvertSurfaceFormat(surface, PixelFormatEnum.to_num(new_format), 0))
@@ -43,9 +48,17 @@ module RbSDL2
 
       require_relative 'rw_ops'
 
+      # ファイルから画像を読み込み新たな Surface オブジェクトを生成します。
+      # file へ読み込む画像ファイルのパスを与えます。
+      # 対応する画像は BMP 形式のみです。
+      # 読み込みができない場合は例外（RbSDL2::RbSDL2Error）を発生させます。
+      # インデックスカラー（2色、16色）は INDEX8 フォーマットとして読み込まれます。
       def load(file) = RWOps.new(file, "rb") { |rw| load_rw(rw) }
 
-      # load_rw は与えられたオブジェクトをオートクローズしません。
+      # RWOps から画像を読み込み新たな Surface オブジェクトを生成します。
+      # rw へ RbSDL2::RWOps オブジェクトか SDL_RWOps ポインターを与えます。
+      # 読み込みができない場合は例外（RbSDL2::RbSDL2Error）を発生させます。
+      # このメソッドは与えられたオブジェクトをクローズしません。
       def load_rw(rw)
         ptr = SurfacePointer.new(::SDL2.SDL_LoadBMP_RW(rw, 0))
         raise RbSDL2Error if ptr.null?
@@ -54,6 +67,10 @@ module RbSDL2
         obj
       end
 
+      # 新しい Surface オブジェクトを生成します。
+      # w へ画像の幅ピクセル数
+      # h へ画像の縦ピクセル数
+      # format へ画像フォーマット(PixelFormatEnumの名前か番号)を与えます。
       def new(w, h, format)
         ptr = SurfacePointer.new(
           ::SDL2.SDL_CreateRGBSurfaceWithFormat(0, w, h, 0, PixelFormatEnum.to_num(format)))
@@ -61,6 +78,10 @@ module RbSDL2
         super(ptr)
       end
 
+      # ポインターから Surface オブジェクトを生成します。
+      # ptr へ対象となるポインターを与えます。
+      # このメソッドは SDL_Surface 構造体の参照カウンターをサポートしています。
+      # 生成した Surface オブジェクトは SDL 側で破棄しても Ruby 側のスコープに存在していれば安全に使用できます。
       def to_ptr(ptr)
         obj = allocate
         obj.__send__(:initialize, SurfacePointer.to_ptr(ptr))
