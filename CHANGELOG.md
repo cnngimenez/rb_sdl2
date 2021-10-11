@@ -3,9 +3,10 @@
 ### Added
 - Added metadata to gemspec.
 - Added document to Error, Platform, SDL, Surface, Timer, and Version.
+- Added description to README.md.
 
 ### Changed
-- Palette#inspect
+- Changed the contents of Palette#inspect to something meaningful.
 
 ### Deprecated
 
