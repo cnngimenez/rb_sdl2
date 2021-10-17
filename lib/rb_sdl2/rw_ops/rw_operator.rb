@@ -10,7 +10,7 @@ module RbSDL2
       def initialize(obj)
         # int (* close) (struct SDL_RWops * context);
         super(:int, [:pointer]) do |_context|
-          # close の際に _context ポインターを開放してはならない。
+          # close の際に _context ポインターを開放してはならない。ポインターは GC が管理する。
           (obj.close; 0) rescue -1
         end
       end
@@ -63,10 +63,13 @@ module RbSDL2
       end
     end
 
-    class RWopsPointer < ::FFI::AutoPointer
+    class RWOperatorPointer < RWOps::RWOpsPointer
       class << self
-        # SDL_AllocRW で確保したポインターのみ SDL_FreeRW で開放できる。
-        def release(ptr) = ::SDL2.SDL_FreeRW(ptr)
+        def release(ptr)
+          # オブジェクトはクローズしない。（GC 回収の時には close コールバックオブジェクトは消えている）
+          # SDL_AllocRW で確保したポインターのみ SDL_FreeRW で開放できる。
+          ::SDL2.SDL_FreeRW(ptr)
+        end
       end
     end
 
@@ -77,26 +80,26 @@ module RbSDL2
       # メソッドの戻り値は Ruby IO と同じ値を返せばよい。
       # メソッド内での例外は SDL のエラーに変換され、Ruby 側には反映されない。
       # obj がメソッド呼び出しに応答しない場合も安全である。その場合は SDL 側にエラーが通知される。
-      def new(io)
-        ptr = RWopsPointer.new(::SDL2.SDL_AllocRW)
+      def new(obj)
+        ptr = RWOperatorPointer.new(::SDL2.SDL_AllocRW)
         raise RbSDL2Error if ptr.null?
-        super(ptr, io)
+        super(ptr, obj)
       end
     end
 
     def initialize(ptr, obj)
-      st = ::SDL2::SDL_RWops.new(ptr)
-      st[:close] = @close = CloseCallback.new(obj)
-      st[:read]  = @read  = ReadCallback.new(obj)
-      st[:seek]  = @seek  = SeekCallback.new(obj)
-      st[:size]  = @size  = SizeCallback.new(obj)
-      st[:write] = @write = WriteCallback.new(obj)
       @obj = obj
-      @ptr = ptr
+      @st = ::SDL2::SDL_RWops.new(ptr).tap do |st|
+        st[:close] = @close = CloseCallback.new(obj)
+        st[:read]  = @read  = ReadCallback.new(obj)
+        st[:seek]  = @seek  = SeekCallback.new(obj)
+        st[:size]  = @size  = SizeCallback.new(obj)
+        st[:write] = @write = WriteCallback.new(obj)
+      end
     end
 
     def __getobj__ = @obj
 
-    def to_ptr = @ptr
+    def to_ptr = @st.to_ptr
   end
 end

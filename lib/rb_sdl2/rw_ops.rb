@@ -1,11 +1,12 @@
 module RbSDL2
   class RWOps
-    class Releaser < ::FFI::AutoPointer
+    class RWOpsPointer < ::FFI::AutoPointer
       class << self
         def release(ptr)
           # SDL_RWclose は RWOps構造体を開放する。そのため呼び出しは1回しかできない。
           # ::FFI::AutoPointer を使うことで2重開放を防ぐ。
-          raise RbSDL2Error if ::SDL2.SDL_RWclose(ptr) < 0
+          err = ::SDL2.SDL_RWclose(ptr)
+          raise RbSDL2Error if err < 0
         end
       end
 
@@ -26,16 +27,28 @@ module RbSDL2
               else
                 ::SDL2.SDL_RWFromMem(mem, size)
               end
+        ptr = RWOpsPointer.new(ptr)
         raise RbSDL2Error if ptr.null?
+        ptr.autorelease = autoclose
         obj = allocate
-        obj.__send__(:initialize, ptr, mem, autoclose: autoclose)
+        obj.__send__(:initialize, ptr, mem)
+        if block_given?
+          begin
+            yield(obj)
+          ensure
+            obj.close
+          end
+        else
+          obj
+        end
       end
 
       # mode は一般的なファイルAPIと同じ文字列が使用できる。
       def new(file, _mode = "rb", autoclose: true, mode: _mode)
-        ptr = ::SDL2.SDL_RWFromFile(file.to_s, mode)
+        ptr = RWOpsPointer.new(::SDL2.SDL_RWFromFile(file.to_s, mode))
         raise RbSDL2Error if ptr.null?
-        obj = super(ptr, autoclose: autoclose)
+        ptr.autorelease = autoclose
+        obj = super(ptr, file)
         if block_given?
           begin
             yield(obj)
@@ -48,36 +61,48 @@ module RbSDL2
       end
       alias open new
 
-      def to_ptr(ptr)
-        obj = allocate
-        obj.__send__(:initialize, ptr, autoclose: false)
-        obj
-      end
-
       require_relative 'rw_ops/rw_operator'
 
-      def with_object(obj)
-        rw = RWOperator.new(obj)
+      # io 引数には Ruby の IO オブジェクトのように振る舞うオブジェクトを与える。
+      # オブジェクトは自動的にクローズされない。（close が呼ばれた場合はクローズする）
+      # autoclose オプション引数に false を与えて、RWOps#to_ptr から取り出したポインターを
+      # C のスコープへ渡す場合、ポインターが利用されている間 RWOps オブジェクトを生存させる必要がある。
+      def with_object(io, autoclose: true)
+        rw = RWOperator.new(io)
+        ptr = rw.to_ptr
+        ptr.autorelease = autoclose
         obj = allocate
-        obj.__send__(:initialize, rw.to_ptr, rw, autoclose: false)
+        obj.__send__(:initialize, ptr, rw)
+        if block_given?
+          begin
+            yield(obj)
+          ensure
+            obj.close
+          end
+        else
+          obj
+        end
       end
     end
 
-    def initialize(ptr, obj = nil, autoclose:)
+    def initialize(ptr, obj = nil)
       @obj = obj
-      @ptr = Releaser.new(ptr)
-      self.autoclose = autoclose
+      @ptr = ptr
     end
 
     def autoclose=(bool)
       @ptr.autorelease = bool
     end
 
-    def autoclose? = @ptr.autorelease
+    def autoclose? = @ptr.autorelease?
 
     def close = @ptr.free
 
     def closed? = @ptr.released?
+
+    def inspect
+      "#<#{self.class.name}:#{@obj.inspect}>"
+    end
 
     def read(length = nil)
       raise IOError if closed?
