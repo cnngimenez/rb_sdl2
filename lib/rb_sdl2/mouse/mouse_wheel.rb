@@ -6,7 +6,7 @@ module RbSDL2
 
       MOUSE_WHEEL_EVENT_WATCH = -> (event, _) {
         if event.mouse_wheel?
-          a = event[:direction] == ::SDL2::SDL_MOUSEWHEEL_FLIPPED ? -1 : 1
+          a = event[:direction] == ::SDL::MOUSEWHEEL_FLIPPED ? -1 : 1
           @timestamp = event[:timestamp]
           @x = event[:x] * a
           @y = event[:y] * a

@@ -6,11 +6,11 @@ module RbSDL2
       # パスの区切り記号は環境依存である。Windows であれば "\" が使われる。
       # Ruby は環境依存のパスの区切り文字を正しく取り扱うことができる。
       def base_path
-        ptr = ::SDL2.SDL_GetBasePath
+        ptr = ::SDL.GetBasePath
         raise RbSDL2Error if ptr.null?
         ptr.read_string.force_encoding(Encoding::UTF_8)
       ensure
-        ::SDL2.SDL_free(ptr)
+        ::SDL.free(ptr)
       end
 
       # アプリケーションが書き込むことのできるパスを戻す。
@@ -28,12 +28,12 @@ module RbSDL2
       # SDL が知りたいことはアプリケーションがアクセス可能かどうかだけだ。
       # エラーが出るかどうかはユーザが設定するパスのアクセス制限による。
       def pref_path(org_name, app_name)
-        ptr = ::SDL2.SDL_GetPrefPath(org_name.encode(Encoding::UTF_8),
+        ptr = ::SDL.GetPrefPath(org_name.encode(Encoding::UTF_8),
                                      app_name.encode(Encoding::UTF_8))
         raise RbSDL2Error if ptr.null?
         ptr.read_string.force_encoding(Encoding::UTF_8)
       ensure
-        ::SDL2.SDL_free(ptr)
+        ::SDL.free(ptr)
       end
     end
   end

@@ -1,39 +1,39 @@
 module RbSDL2
   module CPUInfo
     class << self
-      def cpu_count = ::SDL2.SDL_GetCPUCount
+      def cpu_count = ::SDL.GetCPUCount
 
-      def cpu_cache_line_size = ::SDL2.SDL_GetCPUCacheLineSize
+      def cpu_cache_line_size = ::SDL.GetCPUCacheLineSize
 
-      def system_ram = ::SDL2.SDL_GetSystemRAM
+      def system_ram = ::SDL.GetSystemRAM
 
-      def rdtsc? = ::SDL2.SDL_HasRDTSC == ::SDL2::SDL_TRUE
+      def rdtsc? = ::SDL.HasRDTSC == ::SDL::TRUE
 
-      def altivec? = ::SDL2.SDL_HasAltiVec == ::SDL2::SDL_TRUE
+      def altivec? = ::SDL.HasAltiVec == ::SDL::TRUE
 
-      def mmx? = ::SDL2.SDL_HasMMX == ::SDL2::SDL_TRUE
+      def mmx? = ::SDL.HasMMX == ::SDL::TRUE
 
-      def _3dnow? = ::SDL2.SDL_Has3DNow == ::SDL2::SDL_TRUE
+      def _3dnow? = ::SDL.Has3DNow == ::SDL::TRUE
 
-      def sse? = ::SDL2.SDL_HasSSE == ::SDL2::SDL_TRUE
+      def sse? = ::SDL.HasSSE == ::SDL::TRUE
 
-      def sse2? = ::SDL2.SDL_HasSSE2 == ::SDL2::SDL_TRUE
+      def sse2? = ::SDL.HasSSE2 == ::SDL::TRUE
 
-      def sse3? = ::SDL2.SDL_HasSSE3 == ::SDL2::SDL_TRUE
+      def sse3? = ::SDL.HasSSE3 == ::SDL::TRUE
 
-      def sse41? = ::SDL2.SDL_HasSSE41 == ::SDL2::SDL_TRUE
+      def sse41? = ::SDL.HasSSE41 == ::SDL::TRUE
 
-      def sse42? = ::SDL2.SDL_HasSSE42 == ::SDL2::SDL_TRUE
+      def sse42? = ::SDL.HasSSE42 == ::SDL::TRUE
 
-      def avx? = ::SDL2.SDL_HasAVX == ::SDL2::SDL_TRUE
+      def avx? = ::SDL.HasAVX == ::SDL::TRUE
 
-      def avx2? = ::SDL2.SDL_HasAVX2 == ::SDL2::SDL_TRUE
+      def avx2? = ::SDL.HasAVX2 == ::SDL::TRUE
 
-      def avx512f = ::SDL2.SDL_HasAVX512F == ::SDL2::SDL_TRUE
+      def avx512f = ::SDL.HasAVX512F == ::SDL::TRUE
 
-      def armsimd? = ::SDL2.SDL_HasARMSIMD == ::SDL2::SDL_TRUE
+      def armsimd? = ::SDL.HasARMSIMD == ::SDL::TRUE
 
-      def neon? = ::SDL2.SDL_HasNEON == ::SDL2::SDL_TRUE
+      def neon? = ::SDL.HasNEON == ::SDL::TRUE
     end
   end
 end

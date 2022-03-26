@@ -88,11 +88,11 @@ module RbSDL2
                             nil
                           else
                             c_str = "#{val}\x00"
-                            ptr = ::SDL2.SDL_malloc(c_str.size)
+                            ptr = ::SDL.malloc(c_str.size)
                             raise NoMemoryError if ptr.null?
                             ptr.write_bytes(c_str)
                           end
-          ::SDL2.SDL_free(_ptr)
+          ::SDL.free(_ptr)
         else
           raise ArgumentError
         end

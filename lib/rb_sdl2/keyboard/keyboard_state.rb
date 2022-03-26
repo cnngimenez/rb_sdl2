@@ -5,11 +5,11 @@ module RbSDL2
 
     def initialize
       num_keys = ::FFI::MemoryPointer.new(:int)
-      # SDL_GetKeyboardState が戻すポインターは SDL がロードされた時点でメモリー確保している。
+      # GetKeyboardState が戻すポインターは SDL がロードされた時点でメモリー確保している。
       # 戻されたポインターは不変と考えてよい。
-      # SDL_GetKeyboardState は SDL_init より前に呼ぶことができる。
-      # SDL_GetKeyboardState は引数に NULL ポインターを与えた場合にエラーを戻す。
-      @ptr = ::SDL2.SDL_GetKeyboardState(num_keys)
+      # GetKeyboardState は init より前に呼ぶことができる。
+      # GetKeyboardState は引数に NULL ポインターを与えた場合にエラーを戻す。
+      @ptr = ::SDL.GetKeyboardState(num_keys)
       raise RbSDL2Error if @ptr.null?
       @size = num_keys.read_int
     end
@@ -19,7 +19,7 @@ module RbSDL2
     # 真偽値を戻すようにしなかったのは、このメソッドを応用したコードを書く際に index 情報を不要にするためである。
     # 戻り値が nil | obj なのは Numeric#nonzero? を参考にした。（この戻り値は Ruby において真偽値と同等である）
     def [](nth)
-      if 0 <= nth && nth < size && @ptr[nth].read_uint8 == ::SDL2::SDL_PRESSED
+      if 0 <= nth && nth < size && @ptr[nth].read_uint8 == ::SDL::PRESSED
         nth
       end
     end

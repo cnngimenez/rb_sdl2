@@ -2,7 +2,7 @@ module RbSDL2
   module MessageBox
     class MessageBoxButtonDataArray
       def initialize(num)
-        @entity_class = ::SDL2::SDL_MessageBoxButtonData
+        @entity_class = ::SDL::MessageBoxButtonData
         @ptr = ::FFI::MemoryPointer.new(@entity_class.size, num)
       end
 
@@ -14,7 +14,7 @@ module RbSDL2
     class MessageBoxData
       def initialize(buttons: nil, colors: nil, escape_key: nil, level: nil, message: nil,
                      return_key: nil, title: nil, window: nil)
-        @st = ::SDL2::SDL_MessageBoxData.new.tap do |data|
+        @st = ::SDL::MessageBoxData.new.tap do |data|
           button_data = *buttons
           data[:numbuttons] = num_buttons = button_data.length
           data[:buttons] = @buttons = num_buttons.nonzero? &&
@@ -24,8 +24,8 @@ module RbSDL2
                 st, (text, *) = data_ary[idx], button_data[idx]
                 st[:buttonid] = idx
                 st[:flags] = case idx
-                             when escape_key then ::SDL2::SDL_MESSAGEBOX_BUTTON_ESCAPEKEY_DEFAULT
-                             when return_key then ::SDL2::SDL_MESSAGEBOX_BUTTON_RETURNKEY_DEFAULT
+                             when escape_key then ::SDL::MESSAGEBOX_BUTTON_ESCAPEKEY_DEFAULT
+                             when return_key then ::SDL::MESSAGEBOX_BUTTON_RETURNKEY_DEFAULT
                              else 0
                              end
                 st[:text] = @button_texts[idx] =
@@ -33,7 +33,7 @@ module RbSDL2
               end
             end
           data[:colorScheme] = @color_scheme = colors &&
-            ::SDL2::SDL_MessageBoxColorScheme.new.tap do |st|
+            ::SDL::MessageBoxColorScheme.new.tap do |st|
               # r, g, b, a 形式だった場合にエラーを出さない。
               st[:colors].each.with_index { |c, i| c[:r], c[:g], c[:b] = colors[i] }
             end
@@ -53,9 +53,9 @@ module RbSDL2
       class << self
         def to_num(obj)
           case obj
-          when /\Aerror/ then ::SDL2::SDL_MESSAGEBOX_ERROR
-          when /\Ainfo/ then ::SDL2::SDL_MESSAGEBOX_INFORMATION
-          when /\Awarn/ then ::SDL2::SDL_MESSAGEBOX_WARNING
+          when /\Aerror/ then ::SDL::MESSAGEBOX_ERROR
+          when /\Ainfo/ then ::SDL::MESSAGEBOX_INFORMATION
+          when /\Awarn/ then ::SDL::MESSAGEBOX_WARNING
           when nil then 0
           else
             raise ArgumentError
@@ -68,7 +68,7 @@ module RbSDL2
 
     class << self
       def alert(msg = nil, window = nil, level: nil, message: msg, title: nil)
-        err = ::SDL2.SDL_ShowSimpleMessageBox(MessageBoxFlags.to_num(level),
+        err = ::SDL.ShowSimpleMessageBox(MessageBoxFlags.to_num(level),
                                               title&.to_s&.encode(Encoding::UTF_8),
                                               message&.to_s&.encode(Encoding::UTF_8),
                                               window)
@@ -95,7 +95,7 @@ module RbSDL2
         end
         ptr = ::FFI::MemoryPointer.new(:int)
         data = MessageBoxData.new(buttons: button_data, message: message, window: window, **opts)
-        err = ::SDL2.SDL_ShowMessageBox(data, ptr)
+        err = ::SDL.ShowMessageBox(data, ptr)
         raise RbSDL2Error if err < 0
         # (Escape キーの割り当てがない場合に) Escape キーが押された場合 idx = -1
         if (idx = ptr.read_int) < 0

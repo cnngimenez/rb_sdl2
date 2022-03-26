@@ -1,15 +1,15 @@
 module RbSDL2
   module TextInput
     class << self
-      def active? = ::SDL2.SDL_IsTextInputActive == ::SDL2::SDL_TRUE
+      def active? = ::SDL.IsTextInputActive == ::SDL::TRUE
 
       def bounds=(rect)
-        ::SDL2.SDL_SetTextInputRect(Rect.new(*rect))
+        ::SDL.SetTextInputRect(Rect.new(*rect))
       end
 
-      def start = ::SDL2.SDL_StartTextInput
+      def start = ::SDL.StartTextInput
 
-      def stop = ::SDL2.SDL_StopTextInput
+      def stop = ::SDL.StopTextInput
     end
   end
 end

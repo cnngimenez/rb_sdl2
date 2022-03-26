@@ -5,7 +5,7 @@ module RbSDL2
     class DefaultCursor < CursorClass
       class << self
         def new
-          ptr = ::SDL2.SDL_GetDefaultCursor
+          ptr = ::SDL.GetDefaultCursor
           raise RbSDL2Error if ptr.null?
           super(ptr)
         end

@@ -7,23 +7,23 @@ module RbSDL2
         def release(ptr)
           # 備考：SDL では参照カウンターを操作する際にロックを行っていない。
           #
-          # SDL_Surface ポインターの参照カウンターの扱いでは SDL_DONTFREE フラグを考慮する必要がある。
-          # SDL_DONTFREE フラグが設定されていると SDL_FreeSurface を呼び出しても参照カウントが減少しない。
-          # SDL_DONTFREE フラグの状態に関わらず Ruby 側ではポインターを正しく扱えるので参照カウントを増減する。
-          # 備考：Window から SDL_Surface ポインターを取り出す際にこのフラグが設定されている。
+          # Surface ポインターの参照カウンターの扱いでは DONTFREE フラグを考慮する必要がある。
+          # DONTFREE フラグが設定されていると FreeSurface を呼び出しても参照カウントが減少しない。
+          # DONTFREE フラグの状態に関わらず Ruby 側ではポインターを正しく扱えるので参照カウントを増減する。
+          # 備考：Window から Surface ポインターを取り出す際にこのフラグが設定されている。
           st = entity_class.new(ptr)
-          if st[:flags] & ::SDL2::SDL_DONTFREE != 0
+          if st[:flags] & ::SDL::DONTFREE != 0
             st[:refcount] -= 1
-            # SDL_DONTFREE が設定されているので参照カウントの値によらず SDL_FreeSurface を呼び出さない。
+            # DONTFREE が設定されているので参照カウントの値によらず FreeSurface を呼び出さない。
             # スレッドでの競合によりポインターを開放されない可能性（＝メモリーリーク）はある。
-            # 具体的にはこのセクションを実行中に SDL_EventPump が実行され、ウィンドウのリサイズ・イベントが発生
+            # 具体的にはこのセクションを実行中に EventPump が実行され、ウィンドウのリサイズ・イベントが発生
             # したときに起きる。この競合が起きないようにアプリケーションを実装する必要がある。
           else
-            ::SDL2.SDL_FreeSurface(ptr)
+            ::SDL.FreeSurface(ptr)
           end
         end
 
-        def entity_class = ::SDL2::SDL_Surface
+        def entity_class = ::SDL::Surface
       end
     end
 
@@ -39,7 +39,7 @@ module RbSDL2
       # その時はサーフェィス全面がインデックス番号０で埋められています。
       def convert(surface, new_format)
         ptr = SurfacePointer.new(
-          ::SDL2.SDL_ConvertSurfaceFormat(surface, PixelFormatEnum.to_num(new_format), 0))
+          ::SDL.ConvertSurfaceFormat(surface, PixelFormatEnum.to_num(new_format), 0))
         raise RbSDL2Error if ptr.null?
         obj = allocate
         obj.__send__(:initialize, ptr)
@@ -56,11 +56,11 @@ module RbSDL2
       def load(file) = RWOps.new(file, "rb") { |rw| load_rw(rw) }
 
       # RWOps から画像を読み込み新たな Surface オブジェクトを生成します。
-      # rw へ RbSDL2::RWOps オブジェクトか SDL_RWOps ポインターを与えます。
+      # rw へ RbSDL2::RWOps オブジェクトか RWOps ポインターを与えます。
       # 読み込みができない場合は例外（RbSDL2::RbSDL2Error）を発生させます。
       # このメソッドは与えられたオブジェクトをクローズしません。
       def load_rw(rw)
-        ptr = SurfacePointer.new(::SDL2.SDL_LoadBMP_RW(rw, 0))
+        ptr = SurfacePointer.new(::SDL.LoadBMP_RW(rw, 0))
         raise RbSDL2Error if ptr.null?
         obj = allocate
         obj.__send__(:initialize, ptr)
@@ -73,14 +73,14 @@ module RbSDL2
       # format へ画像フォーマット(PixelFormatEnumの名前か番号)を与えます。
       def new(w, h, format)
         ptr = SurfacePointer.new(
-          ::SDL2.SDL_CreateRGBSurfaceWithFormat(0, w, h, 0, PixelFormatEnum.to_num(format)))
+          ::SDL.CreateRGBSurfaceWithFormat(0, w, h, 0, PixelFormatEnum.to_num(format)))
         raise RbSDL2Error if ptr.null?
         super(ptr)
       end
 
       # ポインターから Surface オブジェクトを生成します。
       # ptr へ対象となるポインターを与えます。
-      # このメソッドは SDL_Surface 構造体の参照カウンターをサポートしています。
+      # このメソッドは Surface 構造体の参照カウンターをサポートしています。
       # 生成した Surface オブジェクトは SDL 側で破棄しても Ruby 側のスコープに存在していれば安全に使用できます。
       def to_ptr(ptr)
         obj = allocate
@@ -89,22 +89,22 @@ module RbSDL2
       end
 
       def yuv_conversion_mode_name
-        case ::SDL2.SDL_GetYUVConversionMode
-        when ::SDL2::SDL_YUV_CONVERSION_JPEG then "JPEG"
-        when ::SDL2::SDL_YUV_CONVERSION_BT601 then "BT601"
-        when ::SDL2::SDL_YUV_CONVERSION_BT709 then "BT709"
-        when ::SDL2::SDL_YUV_CONVERSION_AUTOMATIC then "AUTOMATIC"
+        case ::SDL.GetYUVConversionMode
+        when ::SDL::YUV_CONVERSION_JPEG then "JPEG"
+        when ::SDL::YUV_CONVERSION_BT601 then "BT601"
+        when ::SDL::YUV_CONVERSION_BT709 then "BT709"
+        when ::SDL::YUV_CONVERSION_AUTOMATIC then "AUTOMATIC"
         else ""
         end
       end
 
       def yuv_conversion_mode=(mode)
-        ::SDL2.SDL_SetYUVConversionMode(mode)
+        ::SDL.SetYUVConversionMode(mode)
       end
     end
 
     def initialize(ptr)
-      @st = ::SDL2::SDL_Surface.new(ptr)
+      @st = ::SDL::Surface.new(ptr)
     end
 
     def ==(other)
@@ -113,19 +113,19 @@ module RbSDL2
 
     def alpha_mod
       alpha = ::FFI::MemoryPointer.new(:uint8)
-      num = ::SDL2.SDL_GetSurfaceAlphaMod(self, alpha)
+      num = ::SDL.GetSurfaceAlphaMod(self, alpha)
       raise RbSDL2Error if num < 0
       alpha.read_uint8
     end
 
     def alpha_mod=(alpha)
-      num = ::SDL2.SDL_SetSurfaceAlphaMod(self, alpha)
+      num = ::SDL.SetSurfaceAlphaMod(self, alpha)
       raise RbSDL2Error if num < 0
     end
 
     def blend_mode
       blend = ::FFI::MemoryPointer.new(:int)
-      err = ::SDL2.SDL_GetSurfaceBlendMode(self, blend)
+      err = ::SDL.GetSurfaceBlendMode(self, blend)
       raise RbSDL2Error if err < 0
       blend.read_int
     end
@@ -136,7 +136,7 @@ module RbSDL2
     def blend_mode_name = BlendMode.to_name(blend_mode)
 
     def blend_mode=(blend)
-      err = ::SDL2.SDL_SetSurfaceBlendMode(self, BlendMode.to_num(blend))
+      err = ::SDL.SetSurfaceBlendMode(self, BlendMode.to_num(blend))
       raise RbSDL2Error if err < 0
     end
 
@@ -144,9 +144,9 @@ module RbSDL2
       from &&= Rect.new(*from)
       to &&= Rect.new(*to)
       err = if scale
-              ::SDL2.SDL_UpperBlitScaled(other, from, self, to)
+              ::SDL.UpperBlitScaled(other, from, self, to)
             else
-              ::SDL2.SDL_UpperBlit(other, from, self, to)
+              ::SDL.UpperBlit(other, from, self, to)
             end
       raise RbSDL2Error if err < 0
     end
@@ -157,15 +157,15 @@ module RbSDL2
 
     def clip
       rect = Rect.new
-      ::SDL2.SDL_GetClipRect(self, rect)
+      ::SDL.GetClipRect(self, rect)
       rect.to_a
     end
 
     # nil の場合はサーフェィス全域がクリップになる。
     def clip=(rect)
       rect &&= Rect.new(*rect)
-      bool = ::SDL2.SDL_SetClipRect(self, rect)
-      raise "out of bounds" if bool == ::SDL2::SDL_FALSE
+      bool = ::SDL.SetClipRect(self, rect)
+      raise "out of bounds" if bool == ::SDL::FALSE
     end
 
     def clear(color = [0, 0, 0, 0]) = fill(bounds, color)
@@ -173,39 +173,39 @@ module RbSDL2
     def color_key
       return unless color_key?
       key = ::FFI::MemoryPointer.new(:uint32)
-      err = ::SDL2.SDL_GetColorKey(self, key)
+      err = ::SDL.GetColorKey(self, key)
       return RbSDL2Error if err < 0
       pixel_format.unpack_color(key.read_uint32)
     end
 
     def color_key=(color)
       err = if color
-              ::SDL2.SDL_SetColorKey(self, ::SDL2::SDL_TRUE, pixel_format.pack_color(color))
+              ::SDL.SetColorKey(self, ::SDL::TRUE, pixel_format.pack_color(color))
             else
-              ::SDL2.SDL_SetColorKey(self, ::SDL2::SDL_FALSE, 0)
+              ::SDL.SetColorKey(self, ::SDL::FALSE, 0)
             end
       raise RbSDL2Error if err < 0
     end
 
-    def color_key? = ::SDL2.SDL_HasColorKey(self) == ::SDL2::SDL_TRUE
+    def color_key? = ::SDL.HasColorKey(self) == ::SDL::TRUE
 
     def color_mod
       rgb = Array.new(3) { ::FFI::MemoryPointer.new(:uint8) }
-      err = ::SDL2.SDL_GetSurfaceColorMod(self, *rgb)
+      err = ::SDL.GetSurfaceColorMod(self, *rgb)
       raise RbSDL2Error if err < 0
       rgb.map(&:read_uint8)
     end
 
     def color_mod=(color)
       r, g, b = color
-      err = ::SDL2.SDL_SetSurfaceColorMod(self, r, g, b)
+      err = ::SDL.SetSurfaceColorMod(self, r, g, b)
       raise RbSDL2Error if err < 0
     end
 
     def convert(new_format = format) = Surface.convert(self, new_format)
 
     def fill(rect = clip, color = [0, 0, 0, 0])
-      err = ::SDL2.SDL_FillRect(self, Rect.new(*rect), pixel_format.pack_color(color))
+      err = ::SDL.FillRect(self, Rect.new(*rect), pixel_format.pack_color(color))
       raise RbSDL2Error if err < 0
     end
 
@@ -218,7 +218,7 @@ module RbSDL2
     require_relative 'surface/pixel_format'
 
     def pixel_format
-      # SDL_Surface の format メンバーは読み取り専用である。作成時の値が不変であることを前提としている。
+      # Surface の format メンバーは読み取り専用である。作成時の値が不変であることを前提としている。
       @pixel_format ||= PixelFormat.to_ptr(@st[:format])
     end
 
@@ -230,11 +230,11 @@ module RbSDL2
     include PixelFormatEnum
 
     def rle=(bool)
-      err = ::SDL2.SDL_SetSurfaceRLE(self, bool ? 1 : 0)
+      err = ::SDL.SetSurfaceRLE(self, bool ? 1 : 0)
       raise RbSDL2Error if err < 0
     end
 
-    def rle? = ::SDL2.SDL_HasSurfaceRLE(self) == ::SDL2::SDL_TRUE
+    def rle? = ::SDL.HasSurfaceRLE(self) == ::SDL::TRUE
 
     require_relative 'rw_ops'
 
@@ -242,7 +242,7 @@ module RbSDL2
 
     # save_rw は与えられたオブジェクトをオートクローズしません。
     def save_rw(rw)
-      err = ::SDL2.SDL_SaveBMP_RW(rw, 0)
+      err = ::SDL.SaveBMP_RW(rw, 0)
       raise RbSDL2Error if err < 0
       rw
     end
@@ -250,10 +250,10 @@ module RbSDL2
     def size = [width, height]
 
     def synchronize
-      ::SDL2.SDL_LockSurface(self)
+      ::SDL.LockSurface(self)
       yield(self)
     ensure
-      ::SDL2.SDL_UnlockSurface(self)
+      ::SDL.UnlockSurface(self)
     end
 
     def to_ptr = @st.to_ptr

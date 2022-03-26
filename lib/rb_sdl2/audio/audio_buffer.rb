@@ -2,7 +2,7 @@ module RbSDL2
   class Audio
     class AudioBuffer
       class AudioBufferPointer < ::FFI::AutoPointer
-        def self.release(ptr) = ::SDL2::SDL_FreeWAV(ptr)
+        def self.release(ptr) = ::SDL::FreeWAV(ptr)
       end
 
       class << self
@@ -17,7 +17,7 @@ module RbSDL2
           spec = AudioSpec.new
           buf = ::FFI::MemoryPointer.new(:pointer)
           len = ::FFI::MemoryPointer.new(:uint32)
-          err = ::SDL2::SDL_LoadWAV_RW(rw, 0, spec, buf, len)
+          err = ::SDL::LoadWAV_RW(rw, 0, spec, buf, len)
           raise RbSDL2Error if err.null?
           new(AudioBufferPointer.new(buf.read_pointer), len.read_uint32, spec)
         end

@@ -4,13 +4,13 @@ module RbSDL2
       class << self
         def devices(capture = false)
           is_capture = IS_CAPTURE.(capture)
-          ::SDL2.SDL_GetNumAudioDevices(is_capture).times.map do |num|
-            ptr = ::SDL2.SDL_GetAudioDeviceName(num, is_capture)
+          ::SDL.GetNumAudioDevices(is_capture).times.map do |num|
+            ptr = ::SDL.GetAudioDeviceName(num, is_capture)
             raise RbSDL2Error if ptr.null?
 
             spec = AudioSpec.new
-            # SDL_GetAudioDeviceSpec は SDL_GetNumAudioDevices の最新の呼び出しを反映する。
-            err = ::SDL2.SDL_GetAudioDeviceSpec(num, is_capture, spec)
+            # GetAudioDeviceSpec は GetNumAudioDevices の最新の呼び出しを反映する。
+            err = ::SDL.GetAudioDeviceSpec(num, is_capture, spec)
             raise RbSDL2Error if err != 0
 
             new(ptr.read_string.force_encoding(Encoding::UTF_8), capture, spec)

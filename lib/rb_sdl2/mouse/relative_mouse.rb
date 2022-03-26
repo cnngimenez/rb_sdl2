@@ -4,7 +4,7 @@ module RbSDL2
 
     class RelativeMouse < MouseClass
       def update
-        self.button = ::SDL2.SDL_GetRelativeMouseState(x_ptr, y_ptr)
+        self.button = ::SDL.GetRelativeMouseState(x_ptr, y_ptr)
         self
       end
     end

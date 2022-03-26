@@ -5,9 +5,9 @@ module RbSDL2
 
       class PixelFormatPointer < RefCountPointer
         class << self
-          def release(ptr) = ::SDL2.SDL_FreeFormat(ptr)
+          def release(ptr) = ::SDL.FreeFormat(ptr)
 
-          def entity_class = ::SDL2::SDL_PixelFormat
+          def entity_class = ::SDL::PixelFormat
         end
       end
 
@@ -15,7 +15,7 @@ module RbSDL2
         require_relative '../pixel_format_enum'
 
         def new(format)
-          ptr = PixelFormatPointer.new(::SDL2::SDL_AllocFormat(PixelFormatEnum.to_num(format)))
+          ptr = PixelFormatPointer.new(::SDL::AllocFormat(PixelFormatEnum.to_num(format)))
           raise RbSDL2Error if ptr.null?
           super(ptr)
         end
@@ -28,7 +28,7 @@ module RbSDL2
       end
 
       def initialize(ptr)
-        @st = ::SDL2::SDL_PixelFormat.new(ptr)
+        @st = ::SDL::PixelFormat.new(ptr)
       end
 
       def ==(other)
@@ -51,9 +51,9 @@ module RbSDL2
       def pack_color(color)
         r, g, b, a = color
         if alpha_mask?
-          ::SDL2.SDL_MapRGBA(self, r, g, b, a || ::SDL2::SDL_ALPHA_OPAQUE)
+          ::SDL.MapRGBA(self, r, g, b, a || ::SDL::ALPHA_OPAQUE)
         else
-          ::SDL2.SDL_MapRGB(self, r, g, b)
+          ::SDL.MapRGB(self, r, g, b)
         end
       end
 
@@ -62,13 +62,13 @@ module RbSDL2
       def palette
         # パレットは参照カウンターで生存の保証がある。
         # Ruby 側がパレットを保持している限り同一アドレスに違うパレットが作成されることはない。
-        # SDL では PixelFormat の palette メンバーは（行儀よく SDL_SetPixelFormatPalette を使う場合は）
+        # SDL では PixelFormat の palette メンバーは（行儀よく SetPixelFormatPalette を使う場合は）
         # 後から NULL に書き換わることはない。
         (ptr = @st[:palette]) == @palette&.to_ptr ? @palette : @palette = Palette.to_ptr(ptr)
       end
 
       def palette=(pal)
-        err = ::SDL2.SDL_SetPixelFormatPalette(self, pal)
+        err = ::SDL.SetPixelFormatPalette(self, pal)
         raise RbSDL2Error if err < 0
         @palette = nil
       end
@@ -78,9 +78,9 @@ module RbSDL2
       # indexed format のときはパレット番号を引数へ与える。
       def unpack_color(pixel)
         if alpha_mask?
-          ::SDL2.SDL_GetRGBA(pixel, self, *Array.new(4) { ::FFI::MemoryPointer.new(:uint8) })
+          ::SDL.GetRGBA(pixel, self, *Array.new(4) { ::FFI::MemoryPointer.new(:uint8) })
         else
-          ::SDL2.SDL_GetRGB(pixel, self, *Array.new(3) { ::FFI::MemoryPointer.new(:uint8) })
+          ::SDL.GetRGB(pixel, self, *Array.new(3) { ::FFI::MemoryPointer.new(:uint8) })
         end
         color.map(&:read_uint8)
       end

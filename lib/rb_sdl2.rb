@@ -36,10 +36,10 @@ module RbSDL2
     def init = SDL.init
 
     def load(path)
-      ::SDL2.load_lib(path)
+      ::SDL.load_lib(path)
       # オーディオデバイスを閉じ忘れるとアプリケーションの終了時にメモリーアクセス違反を起こす。
       # アプリケーションが強制終了した場合を考慮し終了処理を設定する。
-      at_exit { ::SDL2.SDL_Quit }
+      at_exit { ::SDL.Quit }
     end
 
     def loop

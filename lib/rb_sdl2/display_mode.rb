@@ -1,7 +1,7 @@
 module RbSDL2
   class DisplayMode
     def initialize(format: 0, h: 0, height: h, refresh_rate: 0, w: 0, width: w)
-      @st = ::SDL2::SDL_DisplayMode.new
+      @st = ::SDL::DisplayMode.new
       @st[:format] = PixelFormatEnum.to_num(format)
       @st[:w] = width
       @st[:h] = height

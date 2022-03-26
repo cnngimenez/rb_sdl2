@@ -3,9 +3,9 @@ module RbSDL2
     class RWOpsPointer < ::FFI::AutoPointer
       class << self
         def release(ptr)
-          # SDL_RWclose は RWOps構造体を開放する。そのため呼び出しは1回しかできない。
+          # RWclose は RWOps構造体を開放する。そのため呼び出しは1回しかできない。
           # ::FFI::AutoPointer を使うことで2重開放を防ぐ。
-          err = ::SDL2.SDL_RWclose(ptr)
+          err = ::SDL.RWclose(ptr)
           raise RbSDL2Error if err < 0
         end
       end
@@ -23,9 +23,9 @@ module RbSDL2
     class << self
       def from_memory(mem, size, autoclose: true, readonly: true)
         ptr = if readonly
-                ::SDL2.SDL_RWFromConstMem(mem, size)
+                ::SDL.RWFromConstMem(mem, size)
               else
-                ::SDL2.SDL_RWFromMem(mem, size)
+                ::SDL.RWFromMem(mem, size)
               end
         ptr = RWOpsPointer.new(ptr)
         raise RbSDL2Error if ptr.null?
@@ -45,7 +45,7 @@ module RbSDL2
 
       # mode は一般的なファイルAPIと同じ文字列が使用できる。
       def new(file, _mode = "rb", autoclose: true, mode: _mode)
-        ptr = RWOpsPointer.new(::SDL2.SDL_RWFromFile(file.to_s, mode))
+        ptr = RWOpsPointer.new(::SDL.RWFromFile(file.to_s, mode))
         raise RbSDL2Error if ptr.null?
         ptr.autorelease = autoclose
         obj = super(ptr, file)
@@ -110,20 +110,20 @@ module RbSDL2
       raise ArgumentError if len < 0
       return "" if len == 0
       ptr = ::FFI::MemoryPointer.new(len)
-      num = ::SDL2.SDL_RWread(self, ptr, 1, len)
+      num = ::SDL.RWread(self, ptr, 1, len)
       raise RbSDL2Error if num == 0
       ptr.read_bytes(num)
     end
 
     def seek(offset, whence = IO::SEEK_SET)
       raise IOError if closed?
-      raise RbSDL2Error if ::SDL2.SDL_RWseek(self, offset, whence) == -1
+      raise RbSDL2Error if ::SDL.RWseek(self, offset, whence) == -1
       0
     end
 
     def size
       raise IOError if closed?
-      num = ::SDL2.SDL_RWsize(self)
+      num = ::SDL.RWsize(self)
       raise RbSDL2Error if num < 0
       num
     end
@@ -140,7 +140,7 @@ module RbSDL2
         bytes = obj.to_s
         len = bytes.size
         ptr = ::FFI::MemoryPointer.new(len).write_bytes(bytes)
-        num = ::SDL2.SDL_RWwrite(self, ptr, 1, len)
+        num = ::SDL.RWwrite(self, ptr, 1, len)
         raise RbSDL2Error if num < len
         sum + len
       end

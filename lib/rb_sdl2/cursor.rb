@@ -6,21 +6,21 @@ module RbSDL2
       def color_cursor(...) = ColorCursor.new(...)
 
       def current=(cursor)
-        ::SDL2.SDL_SetCursor(cursor)
+        ::SDL.SetCursor(cursor)
       end
 
       def current?(cursor)
-        ::SDL2.SDL_GetCursor == cursor.to_ptr
+        ::SDL.GetCursor == cursor.to_ptr
       end
 
       require_relative 'cursor/default_cursor'
       def default_cursor = DefaultCursor.instance
 
-      def hide = ::SDL2.SDL_ShowCursor(::SDL2::SDL_DISABLE)
+      def hide = ::SDL.ShowCursor(::SDL::DISABLE)
 
-      def show = ::SDL2.SDL_ShowCursor(::SDL2::SDL_ENABLE)
+      def show = ::SDL.ShowCursor(::SDL::ENABLE)
 
-      def shown? = ::SDL2.SDL_ShowCursor(::SDL2::SDL_QUERY) == ::SDL2::SDL_ENABLE
+      def shown? = ::SDL.ShowCursor(::SDL::QUERY) == ::SDL::ENABLE
 
       def update
         self.current = nil

@@ -5,22 +5,22 @@ module RbSDL2
         require_relative 'event_type'
 
         def clear
-          # type が ::SDL2::SDL_DROPFILE, ::SDL2::SDL_DROPTEXT の場合に
+          # type が ::SDL::DROPFILE, ::SDL::DROPTEXT の場合に
           # イベントに含まれる file メンバーのポインターが開放されない。そのため Ruby 側で開放処理を行う。
-          ptr = ::SDL2::SDL_Event.new[:drop]
-          while peep(ptr, ::SDL2::SDL_GETEVENT, type: ::SDL2::SDL_DROPFILE..::SDL2::SDL_DROPTEXT) > 0
-            ::SDL2::SDL_free(ptr[:file])
+          ptr = ::SDL::Event.new[:drop]
+          while peep(ptr, ::SDL::GETEVENT, type: ::SDL::DROPFILE..::SDL::DROPTEXT) > 0
+            ::SDL::free(ptr[:file])
           end
-          ::SDL2.SDL_FlushEvents(::SDL2::SDL_FIRSTEVENT, ::SDL2::SDL_LASTEVENT)
+          ::SDL.FlushEvents(::SDL::FIRSTEVENT, ::SDL::LASTEVENT)
         end
 
-        def count = peep(nil, ::SDL2::SDL_PEEKEVENT)
+        def count = peep(nil, ::SDL::PEEKEVENT)
         alias length count
         alias size count
 
         def deq(non_block = false, type: nil)
           event = Event.malloc
-          raise RbSDL2Error if non_block while peep(event, ::SDL2::SDL_GETEVENT, type: type) == 0
+          raise RbSDL2Error if non_block while peep(event, ::SDL::GETEVENT, type: type) == 0
           event
         end
 
@@ -29,7 +29,7 @@ module RbSDL2
         # non_block に true を与えると、イベントキューが一杯の時に例外が発生する。
         def enq(event, non_block = false)
           event_copy(event) do |copy|
-            raise RbSDL2Error if non_block while peep(copy, ::SDL2::SDL_ADDEVENT) == 0
+            raise RbSDL2Error if non_block while peep(copy, ::SDL::ADDEVENT) == 0
           end
           event
         end
@@ -53,7 +53,7 @@ module RbSDL2
         private def peep(event, action, type: nil)
           min_type, max_type = case type
                                when nil
-                                 [::SDL2::SDL_FIRSTEVENT, ::SDL2::SDL_LASTEVENT]
+                                 [::SDL::FIRSTEVENT, ::SDL::LASTEVENT]
                                when Range
                                  type.minmax.
                                    map { |obj| Symbol === obj ? EventType.to_num[obj] : obj }
@@ -63,7 +63,7 @@ module RbSDL2
                                else
                                  [type, type]
                                end
-          num = ::SDL2.SDL_PeepEvents(event, event ? 1 : 0, action, min_type, max_type)
+          num = ::SDL.PeepEvents(event, event ? 1 : 0, action, min_type, max_type)
           raise RbSDL2Error if num < 0
           num
         end
@@ -71,12 +71,12 @@ module RbSDL2
         def poll
           main_thread!
           event = Event.malloc
-          ::SDL2::SDL_PollEvent(event).nonzero? && event
+          ::SDL::PollEvent(event).nonzero? && event
         end
 
         def pump
           main_thread!
-          ::SDL2.SDL_PumpEvents
+          ::SDL.PumpEvents
         end
 
         # イベントをキューに入れる。enq との違いは push ではイベントコールバックを起動する。
@@ -84,7 +84,7 @@ module RbSDL2
         # キューに入れることが失敗したら例外が発生する。
         def push(event)
           event_copy(event) do |copy|
-            num = ::SDL2.SDL_PushEvent(copy)
+            num = ::SDL.PushEvent(copy)
             if num > 0
               event
             elsif num == 0
@@ -97,16 +97,16 @@ module RbSDL2
 
         def quit?
           pump
-          ::SDL2.SDL_HasEvent(::SDL2::SDL_QUIT) == ::SDL2::SDL_TRUE
+          ::SDL.HasEvent(::SDL::QUIT) == ::SDL::TRUE
         end
 
         def wait(sec = nil)
           main_thread!
           event = Event.malloc
           if sec.nil?
-            ::SDL2::SDL_WaitEvent(event).nonzero? && event
+            ::SDL::WaitEvent(event).nonzero? && event
           elsif sec >= 0
-            ::SDL2::SDL_WaitEventTimeout(event, sec * 1000).nonzero? && event
+            ::SDL::WaitEventTimeout(event, sec * 1000).nonzero? && event
           else
             raise ArgumentError
           end

@@ -1,19 +1,19 @@
 module RbSDL2
   module Keyboard
     class << self
-      def keycode_to_name(keycode) = ::SDL2.SDL_GetKeyName(keycode).read_string
+      def keycode_to_name(keycode) = ::SDL.GetKeyName(keycode).read_string
 
       # 対応するコードが存在しない場合 0 を戻す。戻り値 は nonzero? メソッドをチェーンすることができる。
       # これは KeyboardState#[] での利用を考慮して設計した。
-      def keycode_to_scancode(keycode) = ::SDL2.SDL_GetScancodeFromKey(keycode)
+      def keycode_to_scancode(keycode) = ::SDL.GetScancodeFromKey(keycode)
 
-      def name_to_keycode(name) = ::SDL2.SDL_GetKeyFromName(name)
+      def name_to_keycode(name) = ::SDL.GetKeyFromName(name)
 
-      def name_to_scancode(name) = ::SDL2.SDL_GetScancodeFromName(name)
+      def name_to_scancode(name) = ::SDL.GetScancodeFromName(name)
 
-      def scancode_to_keycode(scancode) = ::SDL2.SDL_GetKeyFromScancode(scancode)
+      def scancode_to_keycode(scancode) = ::SDL.GetKeyFromScancode(scancode)
 
-      def scancode_to_name(scancode) = ::SDL2.SDL_GetScancodeName(scancode).read_string
+      def scancode_to_name(scancode) = ::SDL.GetScancodeName(scancode).read_string
     end
 
     require 'forwardable'
@@ -37,13 +37,13 @@ module RbSDL2
       # 現在押されているキーのスキャンコードを配列で戻す。
       def scancodes = each.to_a.compact!
 
-      def mod = ::SDL2.SDL_GetModState
+      def mod = ::SDL.GetModState
 
       require_relative 'keyboard/key_mod'
       include KeyMod
 
       def mod=(state)
-        ::SDL2::SDL_SetModState(state)
+        ::SDL::SetModState(state)
       end
     end
   end

@@ -7,7 +7,7 @@ module RbSDL2
     # AudioStream はリアルタイムなリサンプラー、リフォーマッターとして使えるがこれが本当に必要か判らない。
     class << self
       def current
-        ptr = ::SDL2.SDL_GetCurrentAudioDriver
+        ptr = ::SDL.GetCurrentAudioDriver
         raise RbSDL2Error, "Audio subsystem has not been initialized" if ptr.null?
         ptr.read_string
       end
@@ -17,15 +17,15 @@ module RbSDL2
       def devices = AudioDevice.devices
 
       def drivers
-        ::SDL2.SDL_GetNumAudioDrivers.times.map do |num|
-          ptr = ::SDL2.SDL_GetAudioDriver(num)
+        ::SDL.GetNumAudioDrivers.times.map do |num|
+          ptr = ::SDL.GetAudioDriver(num)
           raise RbSDL2Error if ptr.null?
           ptr.read_string
         end
       end
 
       def init(driver)
-        raise RbSDL2Error if ::SDL2.SDL_AudioInit(driver) < 0
+        raise RbSDL2Error if ::SDL.AudioInit(driver) < 0
       end
 
       require_relative 'audio/audio_buffer'
@@ -41,14 +41,14 @@ module RbSDL2
         want = AudioSpec.new(channels: channels, format: AudioFormat.to_num(**format),
                              frequency: frequency, samples: samples)
         have = AudioSpec.new
-        id = ::SDL2.SDL_OpenAudioDevice(device&.to_s, IS_CAPTURE.(capture), want, have,
+        id = ::SDL.OpenAudioDevice(device&.to_s, IS_CAPTURE.(capture), want, have,
                                         AudioAllowedChanges.to_num(**allowed_changes))
         raise RbSDL2Error if id == 0
         super(id, capture, have)
       end
       alias open new
 
-      def quit = ::SDL2.SDL_AudioQuit
+      def quit = ::SDL.AudioQuit
     end
 
     def initialize(id, capture, spec)
@@ -62,11 +62,11 @@ module RbSDL2
 
     def clear
       raise IOError if closed?
-      ::SDL2.SDL_ClearQueuedAudio(self)
+      ::SDL.ClearQueuedAudio(self)
     end
 
     def close
-      ::SDL2.SDL_CloseAudioDevice(id) unless @closed
+      ::SDL.CloseAudioDevice(id) unless @closed
       @closed = true
       nil
     end
@@ -78,24 +78,24 @@ module RbSDL2
 
     def pause
       raise IOError if closed?
-      ::SDL2.SDL_PauseAudioDevice(id, 1)
+      ::SDL.PauseAudioDevice(id, 1)
     end
 
     def play
       raise IOError if closed?
-      ::SDL2.SDL_PauseAudioDevice(id, 0)
+      ::SDL.PauseAudioDevice(id, 0)
     end
 
     def read(len)
       raise IOError if closed?
       ptr = ::FFI::MemoryPointer.new(len)
-      size = ::SDL2.SDL_DequeueAudio(id, ptr, len)
+      size = ::SDL.DequeueAudio(id, ptr, len)
       ptr.read_bytes(size)
     end
 
     def size
       raise IOError if closed?
-      ::SDL2.SDL_GetQueuedAudioSize(id)
+      ::SDL.GetQueuedAudioSize(id)
     end
     alias length size
 
@@ -110,21 +110,21 @@ module RbSDL2
 
     def status
       raise IOError if closed?
-      ::SDL2.SDL_GetAudioDeviceStatus(id)
+      ::SDL.GetAudioDeviceStatus(id)
     end
 
     module AudioStatus
-      def paused? = ::SDL2::SDL_AUDIO_PAUSED == status
+      def paused? = ::SDL::AUDIO_PAUSED == status
 
-      def playing? = ::SDL2::SDL_AUDIO_PLAYING == status
+      def playing? = ::SDL::AUDIO_PLAYING == status
 
-      def stopped? = ::SDL2::SDL_AUDIO_STOPPED == status
+      def stopped? = ::SDL::AUDIO_STOPPED == status
     end
     include AudioStatus
 
     def write(data)
       raise IOError if closed?
-      err = ::SDL2.SDL_QueueAudio(id, data, data.size)
+      err = ::SDL.QueueAudio(id, data, data.size)
       raise RbSDL2Error if err < 0
       data.size
     end

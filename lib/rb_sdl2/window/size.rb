@@ -3,7 +3,7 @@ module RbSDL2
     module Size
       def height
         ptr = ::FFI::MemoryPointer.new(:int)
-        ::SDL2.SDL_GetWindowSize(self, nil, ptr)
+        ::SDL.GetWindowSize(self, nil, ptr)
         ptr.read_int
       end
       alias h height
@@ -15,37 +15,37 @@ module RbSDL2
 
       def maximum_size
         w_h = Array.new(2) { ::FFI::MemoryPointer.new(:int) }
-        ::SDL2.SDL_GetWindowMaximumSize(self, *w_h)
+        ::SDL.GetWindowMaximumSize(self, *w_h)
         w_h.map(&:read_int)
       end
 
       def maximum_size=(w_h)
-        ::SDL2.SDL_SetWindowMaximumSize(self, *w_h)
+        ::SDL.SetWindowMaximumSize(self, *w_h)
       end
 
       def minimum_size
         w_h = Array.new(2) { ::FFI::MemoryPointer.new(:int) }
-        ::SDL2.SDL_GetWindowMinimumSize(self, *w_h)
+        ::SDL.GetWindowMinimumSize(self, *w_h)
         w_h.map(&:read_int)
       end
 
       def minimum_size=(w_h)
-        ::SDL2.SDL_SetWindowMinimumSize(self, *w_h)
+        ::SDL.SetWindowMinimumSize(self, *w_h)
       end
 
       def size
         w_h = Array.new(2) { ::FFI::MemoryPointer.new(:int) }
-        ::SDL2.SDL_GetWindowSize(self, *w_h)
+        ::SDL.GetWindowSize(self, *w_h)
         w_h.map(&:read_int)
       end
 
       def size=(w_h)
-        ::SDL2.SDL_SetWindowSize(self, *w_h)
+        ::SDL.SetWindowSize(self, *w_h)
       end
 
       def width
         ptr = ::FFI::MemoryPointer.new(:int)
-        ::SDL2.SDL_GetWindowSize(self, ptr, nil)
+        ::SDL.GetWindowSize(self, ptr, nil)
         ptr.read_int
       end
       alias w width

@@ -4,12 +4,12 @@ module RbSDL2
 
     class WindowMouse < MouseClass
       def position=(*x_y)
-        ptr = ::SDL2.SDL_GetMouseFocus
-        ::SDL2.SDL_WarpMouseInWindow(ptr, *x_y) unless ptr.null?
+        ptr = ::SDL.GetMouseFocus
+        ::SDL.WarpMouseInWindow(ptr, *x_y) unless ptr.null?
       end
 
       def update
-        self.button = ::SDL2.SDL_GetMouseState(x_ptr, y_ptr)
+        self.button = ::SDL.GetMouseState(x_ptr, y_ptr)
         self
       end
     end

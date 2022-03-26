@@ -3,10 +3,10 @@ module RbSDL2
     module Display
       # Brightness はウィンドウ単体ではなくウインドウの中心があるディスプレイの輝度の取得、変更を行う。
       # 対象となるディスプレイの取得は Window＃display メソッドを呼び出す。
-      def brightness = ::SDL2.SDL_GetWindowBrightness(self)
+      def brightness = ::SDL.GetWindowBrightness(self)
 
       def brightness=(float)
-        err = ::SDL2.SDL_SetWindowBrightness(self, float)
+        err = ::SDL.SetWindowBrightness(self, float)
         raise RbSDL2Error if err < 0
       end
 
@@ -15,7 +15,7 @@ module RbSDL2
       def display = Display.new(display_index)
 
       def display_index
-        index = ::SDL2.SDL_GetWindowDisplayIndex(to_ptr)
+        index = ::SDL.GetWindowDisplayIndex(to_ptr)
         raise RbSDL2Error if index < 0
         index
       end
@@ -23,13 +23,13 @@ module RbSDL2
       require_relative '../display_mode'
       def fullscreen_display_mode
         obj = DisplayMode.new
-        err = ::SDL2.SDL_GetWindowDisplayMode(self, obj)
+        err = ::SDL.GetWindowDisplayMode(self, obj)
         raise RbSDL2Error if err < 0
         obj
       end
 
       def fullscreen_display_mode=(display_mode)
-        err = ::SDL2.SDL_SetWindowDisplayMode(self, display_mode)
+        err = ::SDL.SetWindowDisplayMode(self, display_mode)
         raise RbSDL2Error if err < 0
       end
 
@@ -45,7 +45,7 @@ module RbSDL2
 
           def new(gamma)
             ptr = ::FFI::MemoryPointer.new(:uint16, 256)
-            ::SDL2.SDL_CalculateGammaRamp(gamma, ptr)
+            ::SDL.CalculateGammaRamp(gamma, ptr)
             super(ptr)
           end
         end
@@ -68,7 +68,7 @@ module RbSDL2
 
       def gamma_ramp
         rgb = Array.new(3) { GammaRamp.new }
-        err = ::SDL2.SDL_GetWindowGammaRamp(self, *rgb)
+        err = ::SDL.GetWindowGammaRamp(self, *rgb)
         raise RbSDL2Error if err < 0
         rgb.map(&:to_a)
       end
@@ -77,7 +77,7 @@ module RbSDL2
       # 画面全体に影響を与える。OSからリセットされることもある。
       # アプリケーションが終了しても永続的に影響をあたえる。ユーザにとって望ましくないだろう。
       def gamma_ramp=(r_g_b)
-        err = ::SDL2.SDL_SetWindowGammaRamp(self, *r_g_b.map { |a| GammaRamp[*a] })
+        err = ::SDL.SetWindowGammaRamp(self, *r_g_b.map { |a| GammaRamp[*a] })
         raise RbSDL2Error if err < 0
       end
     end

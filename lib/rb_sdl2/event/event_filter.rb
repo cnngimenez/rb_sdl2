@@ -5,9 +5,9 @@ module RbSDL2
         # SDL にフィルターコールバック関数が設定されている場合に true を戻す。
         def filter_callback_defined?
           _func_userdata = Array.new(2) { ::FFI::MemoryPointer.new(:pointer) }
-          # SDL_GetEventFilter はコールバックのポインター関数が NULL の場合に SDL_FALSE となる。
-          # userdata ポインターが設定されていても SDL_GetEventFilter の戻り値に関与しない。
-          ::SDL2.SDL_GetEventFilter(*_func_userdata) == ::SDL2::SDL_TRUE
+          # GetEventFilter はコールバックのポインター関数が NULL の場合に FALSE となる。
+          # userdata ポインターが設定されていても GetEventFilter の戻り値に関与しない。
+          ::SDL.GetEventFilter(*_func_userdata) == ::SDL::TRUE
         end
       end
 
@@ -19,7 +19,7 @@ module RbSDL2
           @watch_mutex.synchronize do
             raise ArgumentError if @watch_set.assoc(proc)
             func = new(&proc)
-            ::SDL2.SDL_AddEventWatch(func, nil)
+            ::SDL.AddEventWatch(func, nil)
             @watch_set << [proc, func]
           end
           proc
@@ -30,7 +30,7 @@ module RbSDL2
             idx = @watch_set.assoc(proc)
             if idx
               _, func = @watch_set.delete_at(idx)
-              ::SDL2.SDL_DelEventWatch(func, nil)
+              ::SDL.DelEventWatch(func, nil)
             end
           end
           proc
@@ -39,7 +39,7 @@ module RbSDL2
 
       # コールバックへはコピーされたイベントが与えられる。
       def initialize
-        # typedef int (SDLCALL * SDL_EventFilter) (void *userdata, SDL_Event * event);
+        # typedef int (SDLCALL * EventFilter) (void *userdata, Event * event);
         super(:int, [:pointer, :pointer]) { |_, ptr| yield(Event.to_ptr(ptr)) ? 1 : 0 }
       end
     end

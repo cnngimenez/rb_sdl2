@@ -4,7 +4,7 @@ module RbSDL2
       require_relative 'audio_format'
 
       def initialize(channels: 0, format: 0, freq: 0, frequency: freq, samples: 0)
-        @st = ::SDL2::SDL_AudioSpec.new
+        @st = ::SDL::AudioSpec.new
         @st[:channels] = channels
         @st[:format] = format
         @st[:freq] = frequency

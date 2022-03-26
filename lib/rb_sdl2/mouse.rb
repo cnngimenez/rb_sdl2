@@ -2,16 +2,16 @@ module RbSDL2
   module Mouse
     class << self
       def capture=(bool)
-        err = ::SDL2.SDL_CaptureMouse(bool ? ::SDL2::SDL_TRUE : ::SDL2::SDL_FALSE)
+        err = ::SDL.CaptureMouse(bool ? ::SDL::TRUE : ::SDL::FALSE)
         raise RbSDL2Error if err < 0
       end
 
       def relative=(bool)
-        err = ::SDL2.SDL_SetRelativeMouseMode(bool ? ::SDL2::SDL_TRUE : ::SDL2::SDL_FALSE)
+        err = ::SDL.SetRelativeMouseMode(bool ? ::SDL::TRUE : ::SDL::FALSE)
         raise RbSDL2Error if err < 0
       end
 
-      def relative? = ::SDL2.SDL_GetRelativeMouseMode == ::SDL2::SDL_TRUE
+      def relative? = ::SDL.GetRelativeMouseMode == ::SDL::TRUE
     end
 
     require 'forwardable'
