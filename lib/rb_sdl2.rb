@@ -33,7 +33,7 @@ module RbSDL2
   end
 
   class << self
-    def init = SDL.init
+    def init(*flags) = SDL.init(*flags)
 
     def load(path)
       ::SDL.load_lib(path)
