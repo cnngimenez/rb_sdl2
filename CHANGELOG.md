@@ -17,6 +17,7 @@
 - Event#[]= : file メンバーへ nil を与えたとき空文字列として扱うように変更。
 - Event#inspect : 過剰だった情報量を減らした。
 - EventFilter : 与えられたブロックへコピーしたイベントを渡すようにした。イベントに干渉することはできない。しかし、イベントオブジェクトの取り扱いは自由になる。
+- PixelFormatEnum.to_num : 引数に整数を受けなくなった。また定義外のフォーマットネームの場合は例外を戻すようになった。
 - SDL.init, SDL.init? : 引数の形式を変更。
 
 ### Deprecated
@@ -36,6 +37,7 @@
 - Event#typed? : UserEvent を含めた正確な応答ができないため。
 - EventType.to_type : type 値から直接メンバークラスを求めるように変更したため。
 - EventType.minmax : 使わなくなった。
+- PixelFormatEnum : パックされたフォーマットの解析メソッドを削除。実装を変更し不要となったため。
 
 ### Security
 
