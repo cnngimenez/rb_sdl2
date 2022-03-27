@@ -1,6 +1,7 @@
 ## [Unreleased]
 
 ### Added
+- CPUInfo.cpu_extention? : CPU 拡張命令セットの存在を問い合わせる。
 - EventType.register_events : SDL_RegisterEvents() への素直な実装。
 - Event.malloc : イベントポインターを確保する（だけ）のため。これは EventQueue で使うために実装した。
 
@@ -25,6 +26,7 @@
 - Event#initialize_copy : Drop イベントのディープコピーの際に元の file メンバーのポインターを開放ないように。
 
 ### Removed
+- CPUInfo : 拡張命令クエリーメソッドを全て削除。これらは CPUInfo.cpu_extension? メソッドに取って変わられら。
 - Event.clear : ポインターを含むイベントのクリアー結果を定義できない。またメモリーリークの危険性のため。
 - Event.define_user_event : SDL 側への登録と名前定義が同時に行っていたが、これは使い勝手が悪い。求められているものは任意のタイプ値への名前定義だろう。
 - Event.each, Event.reject! : イベントのメンバーが持つポインターの取り扱いが定義できないため。
