@@ -1,6 +1,8 @@
 module RbSDL2
   module Hint
     class << self
+      # ヒントの設定が行われていないときは nil を戻す。
+      # SDL のデフォルト値はハードコーディングされているためこのメソッドで読み出すことはできない。
       def [](name)
         ptr = ::SDL.GetHint(name.to_s)
         ptr.null? ? nil : ptr.read_string
