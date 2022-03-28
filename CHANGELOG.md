@@ -2,7 +2,8 @@
 
 ### Added
 - CPUInfo.cpu_extention? : CPU 拡張命令セットの存在を問い合わせる。
-- EventType.register_events : SDL_RegisterEvents() への素直な実装。
+- Event : SDL_POLLSENTINEL イベントを追加。
+- Event.register_events : SDL_RegisterEvents() への素直な実装。
 - Event.malloc : イベントポインターを確保する（だけ）のため。これは EventQueue で使うために実装した。
 
 ### Changed

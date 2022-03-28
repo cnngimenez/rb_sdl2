@@ -59,6 +59,7 @@ module RbSDL2
         [::SDL::SENSORUPDATE, :sensor_update, ::SDL::SensorEvent],
         [::SDL::RENDER_TARGETS_RESET, :render_targets_reset, ::SDL::CommonEvent],
         [::SDL::RENDER_DEVICE_RESET, :render_device_reset, ::SDL::CommonEvent],
+        [::SDL::POLLSENTINEL, :poll_sentinel, ::SDL::CommonEvent],
       ]
 
       default_klass = -> (_, key) do
