@@ -18,6 +18,8 @@ module RbSDL2
       end
 
       def new(num_colors)
+        # SDL_AllocPalette() のエラーは引数が < 1、または必要なメモリー領域がない場合。
+        # パレットのカラーは作成時に全て [255, 255, 255, 255] で埋められる。
         ptr = PalettePointer.new(::SDL.AllocPalette(num_colors))
         raise RbSDL2Error if ptr.null?
         super(ptr)
@@ -35,7 +37,7 @@ module RbSDL2
     end
 
     def ==(other)
-      other.respond_to?(:to_ptr) && to_ptr == other.to_ptr
+      other.respond_to?(:to_ptr) && other.to_ptr == to_ptr
     end
 
     def [](nth)
@@ -45,8 +47,7 @@ module RbSDL2
 
     # color 引数には ３要素以上の配列であること。４要素目以降は無視される。
     # color 引数は内部で splat する。これに対応していれば配列以外のオブジェクトでもよい。
-    # パレットのカラーが描画に使われるときはアルファ値は無視されて不透明(ALPHA_OPAQUE)として扱わられる。
-    # パレットのカラーは作成時に全て [255, 255, 255, 255] で埋められている。
+    # パレットのカラーが描画に使われるときはアルファ値は無視されて不透明(ALPHA_OPAQUE)として扱う。
     def []=(nth, color)
       raise ArgumentError if nth < 0 || length <= nth
       c = ::SDL::Color.new
@@ -58,11 +59,10 @@ module RbSDL2
     def each = length.times { |nth| yield(self[nth]) }
 
     def inspect
-      "#<#{self.class.name} ptr=#{to_ptr.inspect} colors=#{length} version=#{version}>"
+      "#<#{self.class.name} colors=#{length}>"
     end
 
     def length = @st[:ncolors]
-
     alias size length
 
     def to_a = to_enum.to_a
