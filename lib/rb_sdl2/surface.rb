@@ -11,15 +11,17 @@ module RbSDL2
           # DONTFREE フラグが設定されていると FreeSurface を呼び出しても参照カウントが減少しない。
           # DONTFREE フラグの状態に関わらず Ruby 側ではポインターを正しく扱えるので参照カウントを増減する。
           # 備考：Window から Surface ポインターを取り出す際にこのフラグが設定されている。
-          st = entity_class.new(ptr)
-          if st[:flags] & ::SDL::DONTFREE != 0
-            st[:refcount] -= 1
-            # DONTFREE が設定されているので参照カウントの値によらず FreeSurface を呼び出さない。
-            # スレッドでの競合によりポインターを開放されない可能性（＝メモリーリーク）はある。
-            # 具体的にはこのセクションを実行中に EventPump が実行され、ウィンドウのリサイズ・イベントが発生
-            # したときに起きる。この競合が起きないようにアプリケーションを実装する必要がある。
-          else
-            ::SDL.FreeSurface(ptr)
+          unless ptr.null?
+            st = entity_class.new(ptr)
+            if st[:flags] & ::SDL::DONTFREE != 0
+              st[:refcount] -= 1
+              # DONTFREE が設定されているので参照カウントの値によらず FreeSurface を呼び出さない。
+              # スレッドでの競合によりポインターを開放されない可能性（＝メモリーリーク）はある。
+              # 具体的にはこのセクションを実行中に EventPump が実行され、ウィンドウのリサイズ・イベントが発生
+              # したときに起きる。この競合が起きないようにアプリケーションを実装する必要がある。
+            else
+              ::SDL.FreeSurface(ptr)
+            end
           end
         end
 
@@ -68,9 +70,10 @@ module RbSDL2
       end
 
       # 新しい Surface オブジェクトを生成します。
-      # w へ画像の幅ピクセル数
-      # h へ画像の縦ピクセル数
-      # format へ画像フォーマット(PixelFormatEnumの名前か番号)を与えます。
+      # w は画像の幅ピクセル数
+      # h は画像の縦ピクセル数
+      # format は画像フォーマットのを表すシンボルを与えます。
+      # format へ FOURCC 系の画像フォーマットを与えた場合は例外を戻します。
       def new(w, h, format)
         ptr = SurfacePointer.new(
           ::SDL.CreateRGBSurfaceWithFormat(0, w, h, 0, PixelFormatEnum.to_num(format)))
@@ -215,16 +218,48 @@ module RbSDL2
 
     def pitch = @st[:pitch]
 
+    # 指定位置のピクセル・カラーを戻します。
+    def color(x, y)
+      unpack_pixel(pixel(x, y))
+    end
+
+    # 指定位置のピクセル値を戻します。
+    def pixel(x, y)
+      raise ArgumentError if x < 0 || width <= x
+      raise ArgumentError if y < 0 || height <= y
+
+      # RLE の場合にビットマップ・メモリーへアクセスするため synchronize が必要になる。
+      synchronize do
+        ptr = @st[:pixels] + (pitch * y + bytes_per_pixel * x)
+        case bytes_per_pixel
+        when 1 then ptr.read_uint8
+        when 2 then ptr.read_uint16
+        when 3 then ptr.read_uint32 % 0x1000000 # for little endian
+        when 4 then ptr.read_uint32
+        else
+          raise NotImplementedError
+        end
+      end
+    end
+
     require_relative 'surface/pixel_format'
 
+    # NOTE: @pixel_format へのアクセスは非公開にする予定です。
     def pixel_format
-      # Surface の format メンバーは読み取り専用である。作成時の値が不変であることを前提としている。
-      @pixel_format ||= PixelFormat.to_ptr(@st[:format])
+      # SDL_Surface の format メンバーは読み取り専用である。作成時の値が不変であることを前提とする。
+      # PixelFormat は参照カウンターで管理されている。
+      # 自身を所有している Surface が生きていればリソースが開放されることはない。
+      # PixelFormat は Index 系（５種）のみ個別にリソースが確保されている。
+      # RGB 系は SDL 側でキャッシュがあればそれを、なければ新しくリソースを確保している。
+      @pixel_format ||= PixelFormat.new(@st[:format])
     end
 
     require 'forwardable'
     extend Forwardable
-    def_delegators :pixel_format, *%i(bits_per_pixel bpp format palette palette=)
+    def_delegators :pixel_format,
+                   *%i(a_mask a_mask? b_mask g_mask r_mask
+                   bits_per_pixel bpp bytes_per_pixel format pack_color
+                   palette palette= palette? unpack_pixel)
 
     require_relative 'pixel_format_enum'
     include PixelFormatEnum

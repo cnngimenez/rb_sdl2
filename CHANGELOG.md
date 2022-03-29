@@ -5,6 +5,8 @@
 - Event : SDL_POLLSENTINEL イベントを追加。
 - Event.register_events : SDL_RegisterEvents() への素直な実装。
 - Event.malloc : イベントポインターを確保する（だけ）のため。これは EventQueue で使うために実装した。
+- Surface#color : 指定座標のピクセルのカラーを戻す。
+- Surface#pixel : 指定座標のピクセル値を戻す。
 
 ### Changed
 - sdl2-bindings v0.1.0 に対応した。以前のバージョンは使用できない。
