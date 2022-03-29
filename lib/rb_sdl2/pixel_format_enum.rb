@@ -7,7 +7,7 @@ module RbSDL2
     # Ruby 側でフォーマットの詳細を知るため目的に応じたフォーマット集合を作成することにした。
     # これはコードのメンテナンスを考慮したためである。
     #
-    # [[name, num, type, alpha], ...]
+    # [[sym, num, type, alpha], ...]
     table = [
       [:index1lsb, ::SDL::PIXELFORMAT_INDEX1LSB, :indexed, false],
       [:index1msb, ::SDL::PIXELFORMAT_INDEX1MSB, :indexed, false],
@@ -60,11 +60,11 @@ module RbSDL2
       [:external_oes, ::SDL::PIXELFORMAT_EXTERNAL_OES, :fourcc, false],
     ]
 
-    FORMAT_MAP = table.map { |name, num, _, _| [name, num] }.to_h.freeze
+    FORMAT_MAP = table.map { |sym, n, _, _| [sym, n] }.to_h.freeze
 
-    INDEXED_TYPES = table.inject([]) { |a, _, num, type, _| a << num if type == :indexed }.freeze
+    INDEXED_TYPES = table.inject([]) { |a, (_, n, type, _)| a << n if type == :indexed; a }.freeze
 
-    WITH_ALPHA = table.inject([]) { |a, _, num, _, alpha| a << num if alpha }.freeze
+    WITH_ALPHA = table.inject([]) { |a, (_, n, _, alpha)| a << n if alpha; a }.freeze
 
     class << self
       # obj に与えたピクセルフォーマットに応じた整数値を戻す。
