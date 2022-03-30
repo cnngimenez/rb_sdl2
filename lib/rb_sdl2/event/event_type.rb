@@ -203,6 +203,8 @@ module RbSDL2
 
       def mouse_wheel? = ::SDL::MOUSEWHEEL == type
 
+      def poll_sentinel? = ::SDL::POLLSENTINEL == type
+
       def quit? = ::SDL::QUIT == type
 
       def render_device_reset? = ::SDL::RENDER_DEVICE_RESET == type
