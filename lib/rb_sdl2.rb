@@ -32,9 +32,14 @@ module RbSDL2
     def initialize(error_message = Error.message) = super
   end
 
-  class << self
-    def init(*flags) = SDL.init(*flags)
+  require 'forwardable'
+  extend SingleForwardable
+  def_single_delegators CPUInfo, *%i(cpu_cache_line_size cpu_count cpu_extension? system_ram)
+  def_single_delegators Platform, *%i(platform)
+  def_single_delegators SDL, *%i(init init? quit)
+  def_single_delegators Version, *%i(revision version)
 
+  class << self
     def load(path)
       ::SDL.load_lib(path)
       # オーディオデバイスを閉じ忘れるとアプリケーションの終了時にメモリーアクセス違反を起こす。
@@ -43,11 +48,24 @@ module RbSDL2
     end
 
     def loop
-      while true
-        Event.pump
-        yield
-        Event.clear
+      Event.clear
+      yield until Event.pump
+    end
+
+    # *Experimental*
+    # => ["ja", "JP", "en", "US"]
+    def locales
+      ::SDL.module_exec { attach_function :SDL_GetPreferredLocales, [], :pointer }
+
+      ptr = ::SDL.SDL_GetPreferredLocales
+      raise RbSDL2Error if ptr.null? # OutOfMemory もしくは情報が無い。空配列を返した方がよいだろう。
+      a = []
+      until (c = ptr.read_pointer).null?
+        a << c.read_string
+        ptr += ::FFI::Pointer.size
       end
+      ::SDL.free(ptr)
+      a
     end
   end
 end

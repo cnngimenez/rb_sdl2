@@ -6,7 +6,7 @@ module RbSDL2
 
       # SDL ライブラリのバージョン番号を文字列で返します。形式はセマンティックバージョニングです。
       def version
-        st = ::SDL::version.new
+        st = ::SDL::Version.new
         ::SDL.GetVersion(st)
         "#{st[:major]}.#{st[:minor]}.#{st[:patch]}"
       end

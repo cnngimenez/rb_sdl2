@@ -1,11 +1,12 @@
 ## [Unreleased]
 
 ### Added
-- CPUInfo.cpu_extention? : CPU 拡張命令セットの存在を問い合わせる。
+- CPUInfo.cpu_extension? : CPU 拡張命令セットの存在を問い合わせる。
 - Event : SDL_POLLSENTINEL イベントを追加。
 - Event.register_events : SDL_RegisterEvents() への素直な実装。
 - Event.malloc : イベントポインターを確保する（だけ）のため。これは EventQueue で使うために実装した。
 - Event#poll_sentinel? : SDL_POLLSENTINEL イベントを追加。
+- RbSDL2 : クラスメソッドへ CPUInfo, Platform, SDL, Version のメソッドを追加した。
 - Surface#color : 指定座標のピクセルのカラーを戻す。
 - Surface#pixel : 指定座標のピクセル値を戻す。
 
@@ -23,6 +24,7 @@
 - EventFilter : 与えられたブロックへコピーしたイベントを渡すようにした。イベントに干渉することはできない。しかし、イベントオブジェクトの取り扱いは自由になる。
 - Palette#inspect : 過剰だった情報量を減らした。
 - PixelFormatEnum.to_num : 引数に整数を受けなくなった。また定義外のフォーマットネームの場合は例外を戻すようになった。
+- RbSDL2.loop : ループごとに Event.clear を呼び出すのをやめた。これはイベントを握りつぶさないようにするため。
 - SDL.init, SDL.init? : 引数の形式を変更。
 
 ### Deprecated
