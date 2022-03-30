@@ -67,5 +67,21 @@ module RbSDL2
       ::SDL.free(ptr)
       a
     end
+
+    # url に与えた URL に応じたアプリケーションが起動します。
+    # URL はローカルファイルを指定することができます。
+    # その場合は "file:///full/path/to/file" の形式の文字列を使います。
+    # Windows 環境では "file:///C:/full/path/to/file" のようにドライブレターも含みます。
+    # (パス区切り文字は '/' でも '\' でも問題はない)
+    # 主な使い方としてユーザに提示したい Web サイトをブラウザーを起動して見せたい場合に使用します。
+    # 成功時にアプリケーションへのフォーカスが失われる場合もあります。
+    # 成功しても何も起きていない場合もある。確実な動作のためには実働テストを行う必要がある。
+    # 未対応の環境ではエラーになる。
+    def open_url(url)
+      str = String.try_convert(url)
+      raise TypeError unless str
+      err = ::SDL.OpenURL(str)
+      raise RbSDL2Error if err < 0
+    end
   end
 end

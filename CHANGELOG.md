@@ -7,6 +7,7 @@
 - Event.malloc : イベントポインターを確保する（だけ）のため。これは EventQueue で使うために実装した。
 - Event#poll_sentinel? : SDL_POLLSENTINEL イベントを追加。
 - RbSDL2 : クラスメソッドへ CPUInfo, Platform, SDL, Version のメソッドを追加した。
+- RbSDL2.open_url : アプリケーションからブラウザーを起動できる。
 - Surface#color : 指定座標のピクセルのカラーを戻す。
 - Surface#pixel : 指定座標のピクセル値を戻す。
 
