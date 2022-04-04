@@ -7,6 +7,7 @@ module RbSDL2
   require_relative 'rb_sdl2/display'
   require_relative 'rb_sdl2/display_mode'
   require_relative 'rb_sdl2/error'
+  require_relative 'rb_sdl2/errors'
   require_relative 'rb_sdl2/event'
   require_relative 'rb_sdl2/filesystem'
   require_relative 'rb_sdl2/hint'
@@ -28,9 +29,6 @@ module RbSDL2
   require_relative 'rb_sdl2/video'
   require_relative 'rb_sdl2/version'
 
-  class RbSDL2Error < StandardError
-    def initialize(error_message = Error.message) = super
-  end
 
   require 'forwardable'
   extend SingleForwardable
