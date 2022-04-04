@@ -2,6 +2,7 @@
 
 ### Added
 - CPUInfo.cpu_extension? : CPU 拡張命令セットの存在を問い合わせる。
+- Error.last_error_message= : SDL のエラーメッセージを設定する。
 - Event : SDL_POLLSENTINEL イベントを追加。
 - Event.register_events : SDL_RegisterEvents() への素直な実装。
 - Event.malloc : イベントポインターを確保する（だけ）のため。これは EventQueue で使うために実装した。
@@ -13,6 +14,7 @@
 
 ### Changed
 - sdl2-bindings v0.1.0 に対応した。以前のバージョンは使用できない。
+- Error.message : Error.last_error_message へリネーム。
 - Event.new : type オプション引数を必須とした。不完全なイベントを作成させないため。
 - Event.to_ptr : ポインターの示すイベントをディープコピーしたものを戻す。イベントのメンバーにあるポインターを勝手に開放することができないため。
 - Event.count : type 引数を削除。キューの特性から不必要と判断。
