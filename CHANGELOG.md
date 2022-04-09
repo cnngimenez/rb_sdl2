@@ -8,7 +8,9 @@
 - Event.malloc : イベントポインターを確保する（だけ）のため。これは EventQueue で使うために実装した。
 - Event#poll_sentinel? : SDL_POLLSENTINEL イベントを追加。
 - RbSDL2 : クラスメソッドへ CPUInfo, Platform, SDL, Version のメソッドを追加した。
+- RbSDL2.open_rw : ファイル、メモリー、IO オブジェクトを RWOps インスタンスで開く。Surface.load などで使用する。
 - RbSDL2.open_url : アプリケーションからブラウザーを起動できる。
+- RWFile, RWMemory, RWObject : SDL の SDL_RWops コンストラクターに応じてクラスを分けた。RWOps を継承している。
 - Surface#color : 指定座標のピクセルのカラーを戻す。
 - Surface#pixel : 指定座標のピクセル値を戻す。
 
@@ -28,6 +30,7 @@
 - Palette#inspect : 過剰だった情報量を減らした。
 - PixelFormatEnum.to_num : 引数に整数を受けなくなった。また定義外のフォーマットネームの場合は例外を戻すようになった。
 - RbSDL2.loop : ループごとに Event.clear を呼び出すのをやめた。これはイベントを握りつぶさないようにするため。
+- RWOps : SDL_RWops コンストラクタ毎に子クラスへ分けた。実際に利用する際には RbSDL2.open_rw を使うこと。
 - SDL.init, SDL.init? : 引数の形式を変更。
 
 ### Deprecated

@@ -19,7 +19,7 @@ module RbSDL2
   require_relative 'rb_sdl2/platform'
   require_relative 'rb_sdl2/power_info'
   require_relative 'rb_sdl2/rect'
-  require_relative 'rb_sdl2/rw_ops'
+  require_relative 'rb_sdl2/rw_ops/rw_ops'
   require_relative 'rb_sdl2/screen_saver'
   require_relative 'rb_sdl2/sdl'
   require_relative 'rb_sdl2/surface'
@@ -64,6 +64,18 @@ module RbSDL2
       end
       ::SDL.free(ptr)
       a
+    end
+
+    def open_rw(obj, ...)
+      if String === obj
+        RWFile.open(obj, ...)
+      elsif ::FFI::Pointer === obj
+        RWMemory.open(obj, ...)
+      elsif RWOps === obj
+        block_given? ? yield(obj) : obj
+      else
+        RWObject.open(obj, ...)
+      end
     end
 
     # url に与えた URL に応じたアプリケーションが起動します。
