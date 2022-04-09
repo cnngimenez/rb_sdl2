@@ -30,6 +30,7 @@ module RbSDL2
     end
 
     require_relative 'pixel_format_enum'
+    require_relative 'rw_ops/rw_ops'
 
     class << self
       # 指定した Surface オブジェクトを基に指定した画像フォーマットの新しい Surface オブジェクトを柵瀬します。
@@ -48,25 +49,22 @@ module RbSDL2
         obj
       end
 
-      require_relative 'rw_ops'
-
       # ファイルから画像を読み込み新たな Surface オブジェクトを生成します。
-      # file へ読み込む画像ファイルのパスを与えます。
-      # 対応する画像は BMP 形式のみです。
-      # 読み込みができない場合は例外（RbSDL2::RbSDL2Error）を発生させます。
-      # インデックスカラー（2色、16色）は INDEX8 フォーマットとして読み込まれます。
-      def load(file) = RWOps.new(file, "rb") { |rw| load_rw(rw) }
-
-      # RWOps から画像を読み込み新たな Surface オブジェクトを生成します。
-      # rw へ RbSDL2::RWOps オブジェクトか RWOps ポインターを与えます。
-      # 読み込みができない場合は例外（RbSDL2::RbSDL2Error）を発生させます。
-      # このメソッドは与えられたオブジェクトをクローズしません。
-      def load_rw(rw)
-        ptr = SurfacePointer.new(::SDL.LoadBMP_RW(rw, 0))
-        raise RbSDL2Error if ptr.null?
-        obj = allocate
-        obj.__send__(:initialize, ptr)
-        obj
+      # 読み込みに対応する画像は BMP 形式のみです。
+      # インデックスカラー（2色、16色）は INDEX8 フォーマット（256色）として読み込まれます。
+      # 読み込みができない場合は例外（RbSDL2Error）を発生させます。
+      #
+      # obj には ファイルへのパス（文字列）、オブジェクトを与えることができます。
+      # 例： File.open("path.bmp", "rb") { |f| Surface.load(f) }
+      # パスを与えた場合、読み込み後にクローズします。
+      # オブジェクトを与えた場合、それをクローズしません。
+      # SDL は読み込み時に IO::SEEK_SET によるシークを行います。
+      def load(obj)
+        RbSDL2.open_rw(obj) do |rw|
+          ptr = SurfacePointer.new(::SDL.LoadBMP_RW(rw, 0))
+          raise RbSDL2Error if ptr.null?
+          allocate.tap { |surface| surface.__send__(:initialize, ptr) }
+        end
       end
 
       # 新しい Surface オブジェクトを生成します。
@@ -271,15 +269,19 @@ module RbSDL2
 
     def rle? = ::SDL.HasSurfaceRLE(self) == ::SDL::TRUE
 
-    require_relative 'rw_ops'
-
-    def save(file) = RWOps.new(file, "wb") { |rw| save_rw(rw); nil }
-
-    # save_rw は与えられたオブジェクトをオートクローズしません。
-    def save_rw(rw)
-      err = ::SDL.SaveBMP_RW(rw, 0)
-      raise RbSDL2Error if err < 0
-      rw
+    # 画像をファイルへ書き込みます。
+    # obj には ファイルへのパス（文字列）、オブジェクト、RWOps オブジェクトを与えることができます。
+    # 例： File.open("path.bmp", "wb") { |f| Surface.save(f) }
+    # パスを与えた場合、書き込み後にクローズします。
+    # オブジェクトやRWOps オブジェクトを与えた場合、それらをクローズしません。
+    # SDL は書き込み時に前方向へのシークを行います。（開始点より前には行かない）
+    # ストリーム IO では使用できないでしょう。
+    # 読み込みができない場合は例外（RbSDL2::RbSDL2Error）を発生させます。
+    def save(obj)
+      RbSDL2.open_rw(obj) do |rw|
+        raise RbSDL2Error if ::SDL.SaveBMP_RW(self, rw, 0) < 0
+      end
+      nil
     end
 
     def size = [width, height]

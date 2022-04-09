@@ -40,6 +40,7 @@
 - Event#initialize_copy : Drop イベントのディープコピーの際に元の file メンバーのポインターを開放ないように。
 
 ### Removed
+- AudioBuffer.load_rw : load に取り込まれた。
 - CPUInfo : 拡張命令クエリーメソッドを全て削除。これらは CPUInfo.cpu_extension? メソッドに取って変わられら。
 - Event.clear : ポインターを含むイベントのクリアー結果を定義できない。またメモリーリークの危険性のため。
 - Event.define_user_event : SDL 側への登録と名前定義が同時に行っていたが、これは使い勝手が悪い。求められているものは任意のタイプ値への名前定義だろう。
@@ -51,6 +52,8 @@
 - EventType.to_type : type 値から直接メンバークラスを求めるように変更したため。
 - EventType.minmax : 使わなくなった。
 - PixelFormatEnum : パックされたフォーマットの解析メソッドを削除。実装を変更し不要となったため。
+- Surface.load_rw : load に取り込まれた。
+- Surface＃save_rw : save に取り込まれた。
 
 ### Security
 

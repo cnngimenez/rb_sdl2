@@ -6,20 +6,18 @@ module RbSDL2
       end
 
       class << self
-        require_relative '../rw_ops'
-
-        def load(file) = RWOps.new(file, "rb") { |rw| load_rw(rw) }
-
+        require_relative '../rw_ops/rw_ops'
         require_relative 'audio_spec'
 
-        # load_rw は与えられたオブジェクトをオートクローズしません。
-        def load_rw(rw)
-          spec = AudioSpec.new
-          buf = ::FFI::MemoryPointer.new(:pointer)
-          len = ::FFI::MemoryPointer.new(:uint32)
-          err = ::SDL::LoadWAV_RW(rw, 0, spec, buf, len)
-          raise RbSDL2Error if err.null?
-          new(AudioBufferPointer.new(buf.read_pointer), len.read_uint32, spec)
+        def load(obj)
+          RbSDL2.open_rw(obj) do |rw|
+            spec = AudioSpec.new
+            buf = ::FFI::MemoryPointer.new(:pointer)
+            len = ::FFI::MemoryPointer.new(:uint32)
+            err = ::SDL::LoadWAV_RW(rw, 0, spec, buf, len)
+            raise RbSDL2Error if err.null?
+            new(AudioBufferPointer.new(buf.read_pointer), len.read_uint32, spec)
+          end
         end
       end
 
