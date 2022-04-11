@@ -67,6 +67,10 @@ module RbSDL2
     WITH_ALPHA = table.inject([]) { |a, (_, n, _, alpha)| a << n if alpha; a }.freeze
 
     class << self
+      def to_name(num)
+        ::SDL.GetPixelFormatName(num).read_string.delete_prefix("SDL_PIXELFORMAT_")
+      end
+
       # obj に与えたピクセルフォーマットに応じた整数値を戻す。
       def to_num(obj)
         case obj
@@ -90,7 +94,7 @@ module RbSDL2
 
     def fourcc? = (format >> 28) & 0x0F != 1
 
-    def format_name = ::SDL.GetPixelFormatName(format).read_string.delete_prefix("SDL_PIXELFORMAT_")
+    def format_name = PixelFormatEnum.to_num(format)
 
     def indexed_color? = PixelFormatEnum::INDEXED_TYPES.include?(format)
 
