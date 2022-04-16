@@ -8,6 +8,7 @@
 - Event.malloc : イベントポインターを確保する（だけ）のため。これは EventQueue で使うために実装した。
 - Event#poll_sentinel? : SDL_POLLSENTINEL イベントを追加。
 - RbSDL2 : クラスメソッドへ CPUInfo, Platform, SDL, Version のメソッドを追加した。
+- RbSDL2.clipboard_text, RbSDL2.clipboard_text= : テキストクリップボードの読み書き。
 - RbSDL2.open_rw : ファイル、メモリー、IO オブジェクトを RWOps インスタンスで開く。Surface.load などで使用する。
 - RbSDL2.open_url : アプリケーションからブラウザーを起動できる。
 - RWFile, RWMemory, RWObject : SDL の SDL_RWops コンストラクターに応じてクラスを分けた。RWOps を継承している。

@@ -32,6 +32,8 @@ module RbSDL2
 
   require 'forwardable'
   extend SingleForwardable
+  def_single_delegator Clipboard, :text, :clipboard_text
+  def_single_delegator Clipboard, :text=, :clipboard_text=
   def_single_delegators CPUInfo, *%i(cpu_cache_line_size cpu_count cpu_extension? system_ram)
   def_single_delegators Platform, *%i(platform)
   def_single_delegators SDL, *%i(init init? quit)
