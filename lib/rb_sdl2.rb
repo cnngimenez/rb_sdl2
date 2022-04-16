@@ -37,6 +37,7 @@ module RbSDL2
   def_single_delegators CPUInfo, *%i(cpu_cache_line_size cpu_count cpu_extension? system_ram)
   def_single_delegators Platform, *%i(platform)
   def_single_delegators SDL, *%i(init init? quit)
+  def_single_delegators Timer, *%i(delay realtime ticks)
   def_single_delegators Version, *%i(revision version)
 
   class << self
