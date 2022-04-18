@@ -20,6 +20,18 @@ module RbSDL2
       end
 
       def quit = ::SDL.VideoQuit
+
+      # SDL アプリケーションがスクリーンセーバーの起動を有効にしている場合に true を戻します。
+      # false が戻る場合はスクリーンセーバーの起動が無効です。
+      # SDL アプリケーションが起動している間はスクリーンセーバーが起動しません。
+      def screen_saver? = ::SDL.IsScreenSaverEnabled == ::SDL::TRUE
+
+      # bool に false を与えたときスクリーンセーバーの起動を無効にすることができます。
+      # これは SDL アプリケーション実行中のみシステムに影響を与えます。システムの設定を変更しません。
+      # SDL 2.0.2以降 のデフォルトは false です。
+      def screen_saver=(bool)
+        bool ? ::SDL.EnableScreenSaver : ::SDL.DisableScreenSaver
+      end
     end
   end
 end
