@@ -58,13 +58,12 @@ module RbSDL2
       @id = num
     end
 
-    require_relative 'window/dialog'
     require_relative 'window/display'
     require_relative 'window/grab'
     require_relative 'window/position'
     require_relative 'window/shape'
     require_relative 'window/size'
-    include Dialog, Display, Grab, Position, Shape, Size
+    include Display, Grab, Position, Shape, Size
 
     def always_on_top=(bool)
       ::SDL.SetWindowAlwaysOnTop(self, bool ? ::SDL::TRUE : ::SDL::FALSE)

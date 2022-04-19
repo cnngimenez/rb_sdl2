@@ -1,120 +1,93 @@
 module RbSDL2
   module MessageBox
-    class MessageBoxButtonDataArray
-      def initialize(num)
-        @entity_class = ::SDL::MessageBoxButtonData
-        @ptr = ::FFI::MemoryPointer.new(@entity_class.size, num)
-      end
-
-      def [](nth) = @entity_class.new(@ptr + @entity_class.size * nth)
-
-      def to_ptr = @ptr
-    end
-
-    class MessageBoxData
-      def initialize(buttons: nil, colors: nil, escape_key: nil, level: nil, message: nil,
-                     return_key: nil, title: nil, window: nil)
-        @st = ::SDL::MessageBoxData.new.tap do |data|
-          button_data = *buttons
-          data[:numbuttons] = num_buttons = button_data.length
-          data[:buttons] = @buttons = num_buttons.nonzero? &&
-            MessageBoxButtonDataArray.new(num_buttons).tap do |data_ary|
-              @button_texts = []
-              num_buttons.times do |idx|
-                st, (text, *) = data_ary[idx], button_data[idx]
-                st[:buttonid] = idx
-                st[:flags] = case idx
-                             when escape_key then ::SDL::MESSAGEBOX_BUTTON_ESCAPEKEY_DEFAULT
-                             when return_key then ::SDL::MESSAGEBOX_BUTTON_RETURNKEY_DEFAULT
-                             else 0
-                             end
-                st[:text] = @button_texts[idx] =
-                  ::FFI::MemoryPointer.from_string(text.to_s.encode(Encoding::UTF_8))
-              end
-            end
-          data[:colorScheme] = @color_scheme = colors &&
-            ::SDL::MessageBoxColorScheme.new.tap do |st|
-              # r, g, b, a 形式だった場合にエラーを出さない。
-              st[:colors].each.with_index { |c, i| c[:r], c[:g], c[:b] = colors[i] }
-            end
-          data[:flags] = MessageBoxFlags.to_num(level)
-          data[:message] = @message =
-            ::FFI::MemoryPointer.from_string(message.to_s.encode(Encoding::UTF_8))
-          data[:title] = @title =
-            ::FFI::MemoryPointer.from_string(title.to_s.encode(Encoding::UTF_8))
-          data[:window] = window
-        end
-      end
-
-      def to_ptr = @st.to_ptr
-    end
-
-    module MessageBoxFlags
-      class << self
-        def to_num(obj)
-          case obj
-          when /\Aerror/ then ::SDL::MESSAGEBOX_ERROR
-          when /\Ainfo/ then ::SDL::MESSAGEBOX_INFORMATION
-          when /\Awarn/ then ::SDL::MESSAGEBOX_WARNING
-          when nil then 0
-          else
-            raise ArgumentError
-          end
-        end
-      end
-    end
-
-    CONFIRMATION_OPTIONS = { buttons: { Cancel: false, OK: true }, default: true }.freeze
+    ERROR = ::SDL::MESSAGEBOX_ERROR
+    WARN = ::SDL::MESSAGEBOX_WARNING
+    INFO = ::SDL::MESSAGEBOX_INFORMATION
 
     class << self
-      def alert(msg = nil, window = nil, level: nil, message: msg, title: nil)
-        err = ::SDL.ShowSimpleMessageBox(MessageBoxFlags.to_num(level),
-                                              title&.to_s&.encode(Encoding::UTF_8),
-                                              message&.to_s&.encode(Encoding::UTF_8),
-                                              window)
-        raise RbSDL2Error if err < 0
-      end
+      # 簡単なボタン入力のあるウィンドウを表示します。
+      # SDL が初期化される前に呼び出すことができます。
+      # 環境によってはこのメソッドをメインスレッドで呼び出す必要があるでしょう。
+      # このウィンドウを表示中はアプリケーションはブロックされます。
+      # ボタン配置は右詰めです。配列の先頭のボタン番号 0 がウィンドウ右側に配置され、以降はその左に配置されます。
+      #
+      # level: RbSDL2::MessageBox にある ERROR, WARN, INFO, 0 のどれかを与えます。
+      # これはウィンドウの本文部分に表示するアイコンを選択します。
+      # message:
+      # ウィンドウに表示する本文の文字列を与えます。
+      # オブジェクトを与えた場合はメソッド内部で文字列への変換を試みます。
+      # title:
+      # ウィンドウに表示するタイトルの文字列を与えます。
+      # オブジェクトを与えた場合はメソッド内部で文字列への変換を試みます。
+      # window:
+      # 関連のある親ウィンドウがあればそれを与えます。
+      # メッセージウィンドウが閉じるまで親ウィンドウは入力を受け付けなくなります。
+      # buttons:
+      # ボタンに表示する文字列または文字列の配列です。
+      # オブジェクトを与えた場合はメソッド内部で配列への変換を試みます。
+      # 配列の要素がオブジェクトの場合はメソッド内部で文字列への変換を試みます。
+      # nil を与えた場合はボタンが表示されません。
+      # その場合はユーザがエスケープキーを押さない限りこのメソッドを終了できません。
+      # default:
+      # 選択済みのボタンをボタン番号（0 から始まる）指定します。nil の場合はどのボタンも選択されません。
+      # ウィンドウ表示中にユーザがリターンキーを押すと選択済みのボタンが押されたことになります。
+      #
+      # 戻り値は押されたボタン番号か nil です。
+      # nil になる場合はこのウィンドウがアクティブな時に表示中にエスケープキーが押された場合です。
+      def show(level, message = nil, title = nil, window = nil, buttons: nil, default: nil)
+        # アンダーバーのついた変数はオブジェクトをスコープ中に保持するためにある。
+        data = ::SDL::MessageBoxData.new
+        data[:flags] = level
+        data[:window] = _window = window
+        data[:title] = _title = ::FFI::MemoryPointer.from_string(
+          String(title).dup.encode(Encoding::UTF_8)
+        )
+        data[:message] = _message = ::FFI::MemoryPointer.from_string(
+          String(message).dup.encode(Encoding::UTF_8)
+        )
 
-      def confirm(*args, **opts) = dialog(*args, **opts.merge!(CONFIRMATION_OPTIONS))
+        texts = Array(buttons)
 
-      # buttons: "label" | ["label",...] | [["label", obj],...] | {"label" => obj,...}
-      # buttons １個以上のオブジェクトがあること。０個の場合はエラーになる。
-      # colors: [[r,g,b],...] | nil
-      # 環境（例えば Win10）によっては colors は反映されない。 nil の場合はシステム設定のカラーが使用される。
-      # ユーザがクリックしたボタンに応じたオブジェクトが戻る。
-      # ユーザが Escape キーが押した場合（何も選択しなかった場合）ブロックが与えられていればブロックの評価内容が、
-      # ブロックがなければ nil が戻る。
-      def dialog(msg = nil, window = nil, buttons:, message: msg, **opts)
-        button_data = *buttons
-        raise ArgumentError if button_data.empty?
-        # Escape キーの割り当ては可能だが行わないようにした。
-        # Return キーと Escape キーの割り当てが同じ場合に Return キーは機能しなくなる。
-        if opts.key?(:default)
-          opts.merge!(return_key: button_data.index { |*, obj| obj == opts[:default] })
-          opts.delete(:default)
+        data[:numbuttons] = num_buttons = texts.size
+
+        _texts = Array.new(num_buttons)
+        button_data = ::SDL::MessageBoxButtonData
+        st_size = button_data.size
+
+        data[:buttons] = _buttons = ::FFI::MemoryPointer.new(st_size, num_buttons).tap do |ptr|
+          texts.each_with_index do |text, idx|
+            st = button_data.new(ptr + st_size * idx)
+            # Escape キー（SDL_MESSAGEBOX_BUTTON_ESCAPEKEY_DEFAULT）はボタンへ割り当てない。
+            # return_key と escape_key は排他的でありが同一値の場合はどちらかが機能しないため。
+            st[:flags] = idx == default ? ::SDL::MESSAGEBOX_BUTTON_RETURNKEY_DEFAULT : 0
+            st[:buttonid] = idx
+            st[:text] = _texts[idx] = ::FFI::MemoryPointer.from_string(
+              String(text).dup.encode(Encoding::UTF_8)
+            )
+            st
+          end
         end
+        # colorScheme は環境依存。例えば Windows　では反映されない。NULL の場合はシステム設定のカラーを使用する。
+        data[:colorScheme] = nil
+
         ptr = ::FFI::MemoryPointer.new(:int)
-        data = MessageBoxData.new(buttons: button_data, message: message, window: window, **opts)
         err = ::SDL.ShowMessageBox(data, ptr)
         raise RbSDL2Error if err < 0
+        num = ptr.read_int
         # (Escape キーの割り当てがない場合に) Escape キーが押された場合 idx = -1
-        if (idx = ptr.read_int) < 0
-          block_given? ? yield : nil
-        else
-          button_data[idx]
-        end
+        num if num >= 0
       end
 
-      def error(*args, title: :Error, **opts)
-        alert(*args, title: title, **opts.merge!(level: :error))
-      end
-
-      def info(*args, title: :Information, **opts)
-        alert(*args, title: title, **opts.merge!(level: :info))
-      end
-
-      def warn(*args, title: :Warning, **opts)
-        alert(*args, title: title, **opts.merge!(level: :warn))
+      # シンプルなメッセージウィンドウを開きます。
+      # MessageBox.show の簡易版です。ボタン一つのウィンドウが表示されます。
+      # 戻り値は常に true です。
+      def simple(level, message = nil, title = nil, window = nil)
+        err = ::SDL.ShowSimpleMessageBox(level,
+                                         String(title).dup.encode(Encoding::UTF_8),
+                                         String(message).dup.encode(Encoding::UTF_8),
+                                         window)
+        raise RbSDL2Error if err < 0
+        true
       end
     end
   end
