@@ -76,7 +76,7 @@ module RbSDL2
     def name
       ptr = ::SDL.GetDisplayName(index)
       raise RbSDL2Error if ptr.null?
-      ptr.read_string.force_encoding(Encoding::UTF_8)
+      SDL.ptr_to_str(ptr)
     end
     alias to_s name
 

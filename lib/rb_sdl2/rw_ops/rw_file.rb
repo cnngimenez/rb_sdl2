@@ -4,7 +4,7 @@ module RbSDL2
   class RWFile < RWOps
     def initialize(path, mode = "r")
       @path = path
-      ptr = ::SDL.RWFromFile(path.to_s, mode.to_s)
+      ptr = ::SDL.RWFromFile(SDL.str_to_sdl(path), SDL.str_to_sdl(mode))
       raise RbSDL2Error if ptr.null?
       super(RWOpsPointer.new(ptr))
     end

@@ -13,7 +13,7 @@ module RbSDL2
             err = ::SDL.GetAudioDeviceSpec(num, is_capture, spec)
             raise RbSDL2Error if err != 0
 
-            new(ptr.read_string.force_encoding(Encoding::UTF_8), capture, spec)
+            new(SDL.ptr_to_str(ptr), capture, spec)
           end
         end
       end

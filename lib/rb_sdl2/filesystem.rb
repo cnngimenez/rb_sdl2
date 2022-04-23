@@ -1,16 +1,17 @@
 module RbSDL2
   module Filesystem
     class << self
+      require_relative 'sdl_pointer'
+
       # RbSDL2 にロードされた SDL2 の配置パスを戻す。
       # パスの末尾にはパスの区切り文字がかならずある。
       # パスの区切り記号は環境依存である。Windows であれば "\" が使われる。
       # Ruby は環境依存のパスの区切り文字を正しく取り扱うことができる。
       def base_path
-        ptr = ::SDL.GetBasePath
+        # 戻り値のポインターはアプリケーション側で開放する。
+        ptr = SDLPointer.new(::SDL.GetBasePath)
         raise RbSDL2Error if ptr.null?
-        ptr.read_string.force_encoding(Encoding::UTF_8)
-      ensure
-        ::SDL.free(ptr)
+        ptr.to_s
       end
 
       # アプリケーションが書き込むことのできるパスを戻す。
@@ -28,12 +29,10 @@ module RbSDL2
       # SDL が知りたいことはアプリケーションがアクセス可能かどうかだけだ。
       # エラーが出るかどうかはユーザが設定するパスのアクセス制限による。
       def pref_path(org_name, app_name)
-        ptr = ::SDL.GetPrefPath(org_name.encode(Encoding::UTF_8),
-                                     app_name.encode(Encoding::UTF_8))
+        # 戻り値のポインターはアプリケーション側で開放する。
+        ptr = SDLPointer.new(::SDL.GetPrefPath(SDL.str_to_sdl(org_name), SDL.str_to_sdl(app_name)))
         raise RbSDL2Error if ptr.null?
-        ptr.read_string.force_encoding(Encoding::UTF_8)
-      ensure
-        ::SDL.free(ptr)
+        ptr.to_s
       end
     end
   end

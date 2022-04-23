@@ -195,10 +195,10 @@ module RbSDL2
       ptr == @surface&.to_ptr ? @surface : @surface = Surface.to_ptr(ptr)
     end
 
-    def title = ::SDL.GetWindowTitle(self).read_string.force_encoding(Encoding::UTF_8)
+    def title = SDL.ptr_to_str(::SDL.GetWindowTitle(self))
 
-    def title=(obj)
-      ::SDL.SetWindowTitle(self, obj&.to_s&.encode(Encoding::UTF_8))
+    def title=(s)
+      ::SDL.SetWindowTitle(self, SDL.str_to_sdl(s))
     end
 
     def to_ptr

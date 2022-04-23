@@ -37,6 +37,35 @@ module RbSDL2
                 end
         }.nonzero? || ::SDL::INIT_EVERYTHING
       end
+
+      # SDL String(C String, UTF-8) を Ruby String へ変換します。
+      # 戻り値の文字列エンコードは UTF-8 です。ptr へ与えたポインター先のメモリーは開放しません。
+      # ptr へ NULL ポインターを与えても安全です。その場合は空文字を戻します。
+      # 戻り値の文字列は Ruby 側へコピーされたものです。これを変更しても SDL のメモリー領域に影響を与えません。
+      def ptr_to_str(ptr)
+        if ptr.null?
+          ""
+        else
+          ptr.read_string.force_encoding(Encoding::UTF_8)
+        end
+      end
+
+      # 厳密な定義のためエンコーディングは ASCII-8BIT とする。
+      NUL = "\x00".encode!(Encoding::ASCII_8BIT).freeze
+
+      # Ruby String を SDL で取り扱う String へ変換します。
+      # 戻り値は UTF-8 エンコードされた変更不可能な文字列です。
+      # 内部では s へ与えた文字列をコピーし UTF-8 エンコードへ変換します。（元の文字列への影響はありません）
+      # 文字列に NUL 文字が含まれる場合は ArgumentError が発生します。
+      def str_to_sdl(s)
+        # dup -> UTF-8 -> ASCII-8BIT
+        # ASCII-8BIT にするのは size メソッドで正確なバイト数を得るため。（bytesize は忘れることがある）
+        # frozen にして SDL 用文字列を変更（例えばエンコーディング）させない。
+        sdl = String.new(s).encode!(Encoding::UTF_8).force_encoding(Encoding::ASCII_8BIT).freeze
+        # NUL 文字の混入チェック
+        raise ArgumentError if sdl.include?(NUL)
+        sdl
+      end
     end
   end
 end

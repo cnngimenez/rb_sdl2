@@ -39,12 +39,8 @@ module RbSDL2
         data = ::SDL::MessageBoxData.new
         data[:flags] = level
         data[:window] = _window = window
-        data[:title] = _title = ::FFI::MemoryPointer.from_string(
-          String(title).dup.encode(Encoding::UTF_8)
-        )
-        data[:message] = _message = ::FFI::MemoryPointer.from_string(
-          String(message).dup.encode(Encoding::UTF_8)
-        )
+        data[:title] = _title = ::FFI::MemoryPointer.from_string(SDL.str_to_sdl(title))
+        data[:message] = _message = ::FFI::MemoryPointer.from_string(SDL.str_to_sdl(message))
 
         texts = Array(buttons)
 
@@ -61,9 +57,7 @@ module RbSDL2
             # return_key と escape_key は排他的でありが同一値の場合はどちらかが機能しないため。
             st[:flags] = idx == default ? ::SDL::MESSAGEBOX_BUTTON_RETURNKEY_DEFAULT : 0
             st[:buttonid] = idx
-            st[:text] = _texts[idx] = ::FFI::MemoryPointer.from_string(
-              String(text).dup.encode(Encoding::UTF_8)
-            )
+            st[:text] = _texts[idx] = ::FFI::MemoryPointer.from_string(SDL.str_to_sdl(text))
             st
           end
         end
@@ -83,8 +77,8 @@ module RbSDL2
       # 戻り値は常に true です。
       def simple(level, message = nil, title = nil, window = nil)
         err = ::SDL.ShowSimpleMessageBox(level,
-                                         String(title).dup.encode(Encoding::UTF_8),
-                                         String(message).dup.encode(Encoding::UTF_8),
+                                         SDL.str_to_sdl(title),
+                                         SDL.str_to_sdl(message),
                                          window)
         raise RbSDL2Error if err < 0
         true
