@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
   spec.description   = "RbSDL2 treats the functions and pointers provided by SDL as Ruby objects."
   spec.homepage      = "https://github.com/shinokaro/rb_sdl2/blob/main/README.md"
   spec.license       = "Zlib"
-  spec.required_ruby_version = Gem::Requirement.new(">= 3.0.0")
+  spec.required_ruby_version = Gem::Requirement.new(">= 3.1.0")
 
   spec.metadata['bug_tracker_uri'] = 'https://github.com/shinokaro/rb_sdl2/issues'
   spec.metadata["changelog_uri"] = "https://github.com/shinokaro/rb_sdl2/blob/main/CHANGELOG.md"
