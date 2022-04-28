@@ -1,42 +1,55 @@
 module RbSDL2
   module CPUInfo
     class << self
+      # Power CPU の AltiVec 拡張命令セット
+      def altivec? = ::SDL.HasAltiVec == ::SDL::TRUE
+
+      # AMD x86 CPU の 3DNow! 拡張命令セット
+      def amd3dnow? = ::SDL.Has3DNow == ::SDL::TRUE
+
+      # Arm CPU の SIMD 命令セット
+      def armsimd? = ::SDL.HasARMSIMD == ::SDL::TRUE
+
+      # x86 CPU の AVX 命令セット
+      def avx = ::SDL.HasAVX == ::SDL::TRUE
+
+      # x86 CPU の AVX2 命令セット
+      def avx2 = ::SDL.HasAVX2 == ::SDL::TRUE
+
+      # x86 CPU の AVX-512F 命令セット
+      def avx512f? = ::SDL.HasAVX512F == ::SDL::TRUE
+
+      # CPU の L1 キャッシュラインサイズ（Byte）
       def cpu_cache_line_size = ::SDL.GetCPUCacheLineSize
 
+      # 論理 CPU コアの総数
       def cpu_count = ::SDL.GetCPUCount
 
-      # CPU 拡張命令があるか問い合わせます。 問い合わせできる CPU 拡張命令は
-      #   :rdtsc : RDTSC 命令(x86)
-      #   :altivec : AltiVec 拡張命令セット(Power)
-      #   :mmx : MMX 拡張命令セット(x86)
-      #   :amd3dnow : 3DNow! 拡張命令セット(AMD x86)
-      #   :sse, :sse2, :sse3, :sse41, :sse42, :avx, :avx2, :avx5512f :
-      #     Streaming SIMD 拡張命令セット(x86)
-      #   :armsimd : ARMSIMD 拡張命令セット(Arm)
-      #   :neon : Neon 拡張命令セット(Arm)
-      # です。
-      def cpu_extension?(sym)
-        ::SDL::TRUE == case sym
-                       when :rdtsc then ::SDL.HasRDTSC
-                       when :altivec then ::SDL.HasAltiVec
-                       when :mmx then ::SDL.HasMMX
-                       when :amd3dnow then ::SDL.Has3DNow
-                       when :sse then ::SDL.HasSSE
-                       when :sse2 then ::SDL.HasSSE2
-                       when :sse3 then ::SDL.HasSSE3
-                       when :sse41 then ::SDL.HasSSE41
-                       when :sse42 then ::SDL.HasSSE42
-                       when :avx then ::SDL.HasAVX
-                       when :avx2 then ::SDL.HasAVX2
-                       when :avx512f then ::SDL.HasAVX512F
-                       when :armsimd then ::SDL.HasARMSIMD
-                       when :neon then ::SDL.HasNEON
-                       else
-                         raise ArgumentError, "Invalid cpu extension name(#{sym})"
-                       end
-      end
+      # x86 CPU の MMX 命令セット
+      def mmx? = ::SDL.HasMMX == ::SDL::TRUE
 
-      # システムRAMのサイズを戻します。単位はメガバイトです.
+      # Arm CPU の NEON 命令セット
+      def neon? = ::SDL.HasNEON == ::SDL::TRUE
+
+      # x86 CPU の RDTSC 命令
+      def rdtsc? = ::SDL.HasRDTSC == ::SDL::TRUE
+
+      # x86 CPU の SSE 命令セット
+      def sse? = ::SDL.HasSSE == ::SDL::TRUE
+
+      # x86 CPU の SSE2 命令セット
+      def sse2 = ::SDL.HasSSE2 == ::SDL::TRUE
+
+      # x86 CPU の SSE3 命令セット
+      def sse3 = ::SDL.HasSSE3 == ::SDL::TRUE
+
+      # x86 CPU の SSE4.1 命令セット
+      def sse41? = ::SDL.HasSSE41 == ::SDL::TRUE
+
+      # x86 CPU の SSE4.2 命令セット
+      def sse42? = ::SDL.HasSSE42 == ::SDL::TRUE
+
+      # システム RAM のサイズ（MB）
       def system_ram = ::SDL.GetSystemRAM
     end
   end
