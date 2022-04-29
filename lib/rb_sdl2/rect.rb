@@ -1,5 +1,11 @@
 module RbSDL2
   class Rect
+    class << self
+      def to_ary(ptr)
+        ::SDL::Rect.new(ptr).values
+      end
+    end
+
     def initialize(x = 0, y = 0, w = 0, h = 0)
       @st = ::SDL::Rect.new
       @st[:x], @st[:y], @st[:w], @st[:h] = x, y, w, h
