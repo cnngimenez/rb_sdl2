@@ -57,7 +57,13 @@ module RbSDL2
     end
 
     def initialize(num)
-      @id = num
+      @window_id = num
+    end
+
+    def ==(other)
+      # ウィンドウのポインターは使いまわされている。最初に window_id を比較しなければならない。
+      other.respond_to?(:window_id) && other.window_id == window_id ||
+        other.respond_to?(:to_ptr) && other.to_ptr == to_ptr
     end
 
     require_relative 'accessor'
@@ -70,7 +76,7 @@ module RbSDL2
       ::SDL.DestroyWindow(self) unless destroyed?
     end
 
-    def destroyed? = ::SDL.GetWindowFromID(id).null?
+    def destroyed? = ::SDL.GetWindowFromID(@window_id).null?
 
     def flags = ::SDL.GetWindowFlags(self)
 
@@ -108,9 +114,6 @@ module RbSDL2
       @hit_test_object = obj
     end
 
-    attr_reader :id
-    alias window_id id
-
     def mouse_position=(x_y)
       ::SDL.WarpMouseInWindow(self, *x_y)
     end
@@ -127,7 +130,7 @@ module RbSDL2
     end
 
     def to_ptr
-      ptr = ::SDL.GetWindowFromID(id)
+      ptr = ::SDL.GetWindowFromID(@window_id)
       raise RbSDL2Error, "Invalid window id or window was destroyed" if ptr.null?
       ptr
     end
@@ -156,5 +159,8 @@ module RbSDL2
       end
       self
     end
+
+    attr_reader :window_id
+    alias id window_id
   end
 end
