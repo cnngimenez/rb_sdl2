@@ -1,19 +1,18 @@
 module RbSDL2
   class PowerInfo
     def initialize
-      # ミューテックスを使わずにマルチスレッドに対応するため毎回インスタンスを作成する実装とした。
-      vars = Array.new(2) { ::FFI::MemoryPointer.new(:int) }
-      @state = ::SDL.GetPowerInfo(*vars)
-      @battery_time, @battery_percentage = vars.map(&:read_int).map { |n| n if n >= 0 }
+      @battery_time = ::FFI::MemoryPointer.new(:int)
+      @battery_percentage = ::FFI::MemoryPointer.new(:int)
+      update
     end
 
-    # バッテリーの残り容量（パーセント）を戻しますです。
+    # バッテリーの残り容量（パーセント）を戻します。
     # 残り容量を特定できない, またはバッテリーで動作していない場合 nil を戻します。
-    attr_reader :battery_percentage
+    def battery_percentage = (num = @battery_percentage.read_int) >= 0 ? num : nil
 
     # バッテリーの残り時間（秒）を戻します。
     # 残り時間を特定できない、またはバッテリーで動作していない場合は nil を戻します。
-    attr_reader :battery_time
+    def battery_time = (num = @battery_time.read_int) >= 0 ? num : nil
 
     # バッテリーが搭載されているか？
     def battery? = [::SDL::POWERSTATE_CHARGING,
@@ -39,5 +38,10 @@ module RbSDL2
 
     # 電源、バッテリーの情報なし
     def unknown? = ::SDL::POWERSTATE_UNKNOWN == state
+
+    def update
+      @state = ::SDL.GetPowerInfo(@battery_time, @battery_percentage)
+      self
+    end
   end
 end
