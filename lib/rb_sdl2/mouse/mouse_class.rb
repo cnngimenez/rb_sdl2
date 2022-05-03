@@ -1,33 +1,25 @@
 module RbSDL2
   module Mouse
     class MouseClass
-      require 'singleton'
-      include Singleton
-
-      def initialize
-        @button = 0
-        @x_ptr, @y_ptr = Array.new(2) { ::FFI::MemoryPointer.new(:int) }
+      def initialize(*)
+        @button = @x = @y = 0
+        update
       end
 
-      attr_reader :button
-      private attr_writer :button
+      attr_accessor :button, :x, :y
 
       require_relative 'mouse_button'
       include MouseButton
 
       def position = [x, y]
 
+      def position=(x_y)
+        self.x, self.y = x_y
+      end
+
       # 継承先のクラスではこのメソッドをオーバーライドすること。
       # 戻り値は self が戻ることが期待されている。
-      def update = self
-
-      private attr_reader :x_ptr
-
-      def x = x_ptr.read_int
-
-      private attr_reader :y_ptr
-
-      def y = y_ptr.read_int
+      def update = raise NotImplementedError
     end
   end
 end

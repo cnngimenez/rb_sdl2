@@ -8,17 +8,19 @@ module RbSDL2
       BUTTON_X1MASK = BUTTON.(::SDL::BUTTON_X1)
       BUTTON_X2MASK = BUTTON.(::SDL::BUTTON_X2)
 
+      def button?(mask) = mask & button != 0
+
       def any_button? = button != 0
 
-      def left_button? = BUTTON_LMASK & button != 0
+      def left_button? = button?(BUTTON_LMASK)
 
-      def middle_button? = BUTTON_MMASK & button != 0
+      def middle_button? = button?(BUTTON_MMASK)
 
-      def right_button? = BUTTON_RMASK & button != 0
+      def right_button? = button?(BUTTON_RMASK)
 
-      def x1_button? = BUTTON_X1MASK & button != 0
+      def x1_button? = button?(BUTTON_X1MASK)
 
-      def x2_button? = BUTTON_X2MASK & button != 0
+      def x2_button? = button?(BUTTON_X2MASK)
     end
   end
 end
