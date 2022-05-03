@@ -4,28 +4,22 @@ module RbSDL2
 
     class SurfacePointer < RefCountPointer
       class << self
+        def dontfree?(ptr) = ptr.read_uint32 & ::SDL::DONTFREE != 0
+
+        def entity_class = ::SDL::Surface
+
         def release(ptr)
-          # 備考：SDL では参照カウンターを操作する際にロックを行っていない。
-          #
-          # Surface ポインターの参照カウンターの扱いでは DONTFREE フラグを考慮する必要がある。
-          # DONTFREE フラグが設定されていると FreeSurface を呼び出しても参照カウントが減少しない。
-          # DONTFREE フラグの状態に関わらず Ruby 側ではポインターを正しく扱えるので参照カウントを増減する。
-          # 備考：Window から Surface ポインターを取り出す際にこのフラグが設定されている。
           unless ptr.null?
-            st = entity_class.new(ptr)
-            if st[:flags] & ::SDL::DONTFREE != 0
-              st[:refcount] -= 1
-              # DONTFREE が設定されているので参照カウントの値によらず FreeSurface を呼び出さない。
-              # スレッドでの競合によりポインターを開放されない可能性（＝メモリーリーク）はある。
-              # 具体的にはこのセクションを実行中に EventPump が実行され、ウィンドウのリサイズ・イベントが発生
-              # したときに起きる。この競合が起きないようにアプリケーションを実装する必要がある。
+            if dontfree?(ptr)
+              # SDL_DONTFREE が設定されている場合、SDL_FreeSurface() は参照カウントを減少しない。
+              # Ruby はポインターを正しく扱えるので参照カウントを減ずる。
+              # 備考：Window から Surface ポインターを取り出す際にこのフラグが設定されている。
+              dec_ref(ptr)
             else
               ::SDL.FreeSurface(ptr)
             end
           end
         end
-
-        def entity_class = ::SDL::Surface
       end
     end
 
@@ -88,20 +82,6 @@ module RbSDL2
         obj.__send__(:initialize, SurfacePointer.to_ptr(ptr))
         obj
       end
-
-      def yuv_conversion_mode_name
-        case ::SDL.GetYUVConversionMode
-        when ::SDL::YUV_CONVERSION_JPEG then "JPEG"
-        when ::SDL::YUV_CONVERSION_BT601 then "BT601"
-        when ::SDL::YUV_CONVERSION_BT709 then "BT709"
-        when ::SDL::YUV_CONVERSION_AUTOMATIC then "AUTOMATIC"
-        else ""
-        end
-      end
-
-      def yuv_conversion_mode=(mode)
-        ::SDL.SetYUVConversionMode(mode)
-      end
     end
 
     def initialize(ptr)
@@ -109,7 +89,7 @@ module RbSDL2
     end
 
     def ==(other)
-      other.respond_to?(:to_ptr) && to_ptr == other.to_ptr
+      other.respond_to?(:to_ptr) && other.to_ptr == to_ptr
     end
 
     def alpha_mod
@@ -217,9 +197,7 @@ module RbSDL2
     def pitch = @st[:pitch]
 
     # 指定位置のピクセル・カラーを戻します。
-    def color(x, y)
-      unpack_pixel(pixel(x, y))
-    end
+    def pixel_color(x, y) = unpack_pixel(pixel(x, y))
 
     # 指定位置のピクセル値を戻します。
     def pixel(x, y)
@@ -232,10 +210,10 @@ module RbSDL2
         case bytes_per_pixel
         when 1 then ptr.read_uint8
         when 2 then ptr.read_uint16
-        when 3 then ptr.read_uint32 % 0x1000000 # for little endian
+        when 3 then ptr.read_uint32 & 0x1000000 # for little endian
         when 4 then ptr.read_uint32
         else
-          raise NotImplementedError
+          raise TypeError
         end
       end
     end
