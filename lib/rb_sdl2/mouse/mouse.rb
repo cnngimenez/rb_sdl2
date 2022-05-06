@@ -18,6 +18,8 @@ module RbSDL2
     require_relative 'mouse_wheel'
     require_relative 'relative_mouse'
 
+    @x, @y = ::FFI::MemoryPointer.new(:int), ::FFI::MemoryPointer.new(:int)
+
     class << self
       def global_mouse = GlobalMouse.new.update
 
@@ -27,8 +29,6 @@ module RbSDL2
 
       require_relative 'mouse_button'
       include MouseButton
-
-      @x, @y = ::FFI::MemoryPointer.new(:int), ::FFI::MemoryPointer.new(:int)
 
       def position
         ::SDL.GetMouseState(@x, @y)
