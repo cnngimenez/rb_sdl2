@@ -6,7 +6,6 @@ module RbSDL2
       end
 
       class << self
-        require_relative '../rw_ops/rw_ops'
         require_relative 'audio_spec'
 
         def load(obj)
@@ -35,9 +34,6 @@ module RbSDL2
       require 'forwardable'
       extend Forwardable
       def_delegators :spec, *%i(channels format frequency)
-
-      require_relative 'audio_format'
-      include AudioFormat
 
       def to_ptr = @ptr
 
