@@ -13,6 +13,12 @@ module RbSDL2
         while ::SDL.PeepEvents(ptr, 1, ::SDL::GETEVENT, ::SDL::DROPFILE, ::SDL::DROPTEXT) > 0
           ::SDL.free(ref_ptr)
         end
+        # SDL_FlushEvents() は SDL_TEXTEDITING_EXT の場合に text メンバーのポインターは開放しない。
+        # そのため Ruby 側でポインターの開放を行う。
+        ref_ptr = ptr + ::SDL::TextEditingExtEvent.offset_of(:text)
+        while ::SDL.PeepEvents(ptr, 1, ::SDL::GETEVENT, ::SDL::TEXTEDITING_EXT, ::SDL::TEXTEDITING_EXT) > 0
+          ::SDL.free(ref_ptr)
+        end
         ::SDL.FlushEvents(::SDL::FIRSTEVENT, ::SDL::LASTEVENT)
       end
 

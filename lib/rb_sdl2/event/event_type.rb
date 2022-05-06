@@ -20,6 +20,7 @@ module RbSDL2
       [::SDL::TEXTEDITING, ::SDL::TextEditingEvent, "SDL_TEXTEDITING"],
       [::SDL::TEXTINPUT, ::SDL::TextInputEvent, "SDL_TEXTINPUT"],
       [::SDL::KEYMAPCHANGED, ::SDL::CommonEvent, "SDL_KEYMAPCHANGED"],
+      [::SDL::TEXTEDITING_EXT, ::SDL::TextEditingExtEvent, "SDL_TEXTEDITING_EXT"],
       [::SDL::MOUSEMOTION, ::SDL::MouseMotionEvent, "SDL_MOUSEMOTION"],
       [::SDL::MOUSEBUTTONDOWN, ::SDL::MouseButtonEvent, "SDL_MOUSEBUTTONDOWN"],
       [::SDL::MOUSEBUTTONUP, ::SDL::MouseButtonEvent, "SDL_MOUSEBUTTONUP"],
@@ -200,6 +201,8 @@ module RbSDL2
     def sys_wm_event? = ::SDL::SYSWMEVENT == type
 
     def text_editing? = ::SDL::TEXTEDITING == type
+
+    def text_editing_ext? = ::SDL::TEXTEDITING_EXT == type
 
     def text_input? = ::SDL::TEXTINPUT == type
 

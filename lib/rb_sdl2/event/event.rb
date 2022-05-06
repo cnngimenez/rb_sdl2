@@ -49,6 +49,8 @@ module RbSDL2
       @entity = nil
       @obj = if drop_file? || drop_text?
                SDLPointer.new(entity[:file])
+             elsif text_editing_ext?
+               SDLPointer.new(entity[:text])
              elsif sys_wm_event? && entity[:msg].null?
                # msg に NULL があると SDL はこのポインターをチェックせずに読み出す。
                raise TypeError
@@ -90,7 +92,11 @@ module RbSDL2
                         end
       when :keysym then entity[sym].tap { |st| val.each { |k, v| st[k] = v } }
       when :msg    then raise NotImplementedError
-      when :text   then ::SDL.utf8strlcpy(entity[sym].to_ptr, SDL.str_to_sdl(val), entity[sym].size)
+      when :text   then if text_editing_ext?
+                          entity[sym] = @obj = SDLPointer.from_string(val)
+                        else
+                          ::SDL.utf8strlcpy(entity[sym].to_ptr, SDL.str_to_sdl(val), entity[sym].size)
+                        end
       when :type   then raise TypeError
       else entity[sym] = val
       end
