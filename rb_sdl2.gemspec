@@ -23,5 +23,5 @@ Gem::Specification.new do |spec|
   end
 
   spec.add_dependency "ffi", ">= 1.15.0"
-  spec.add_dependency "sdl2-bindings", ">= 0.1.0"
+  spec.add_dependency "sdl2-bindings", ">= 0.1.1"
 end
