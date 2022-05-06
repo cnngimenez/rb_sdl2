@@ -50,6 +50,14 @@ module RbSDL2
         end
       end
 
+      def play(path)
+        buffer = load(path)
+        obj = Audio.new(spec: buffer.spec)
+        obj.write(buffer)
+        obj.play
+        obj
+      end
+
       def quit = ::SDL.AudioQuit
     end
 
@@ -79,7 +87,7 @@ module RbSDL2
     class Releaser
       def initialize(num) = @id = num
 
-      def call = ::SDL.CloseAudioDevice(@id)
+      def call(_id) = ::SDL.CloseAudioDevice(@id)
     end
 
     def autoclose=(bool)
