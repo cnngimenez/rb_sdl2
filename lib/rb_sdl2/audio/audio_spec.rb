@@ -1,18 +1,25 @@
 module RbSDL2
   class Audio
     class AudioSpec
+      module Reader
+        require 'forwardable'
+        extend Forwardable
+        def_delegators :spec,
+                       *%i(big_endian? bitsize float? signed? channels format frequency samples)
+      end
+
       SDL_AUDIO_MASK_BITSIZE  = 0xFF
       SDL_AUDIO_MASK_DATATYPE = 1 << 8
       SDL_AUDIO_MASK_ENDIAN   = 1 << 12
       SDL_AUDIO_MASK_SIGNED   = 1 << 15
 
-      def initialize(big_endian: false, bit_size: 16, float: false, signed: true,
+      def initialize(big_endian: false, bitsize: 16, float: false, signed: true,
                      channels: 0, format: nil, frequency: 0, samples: 0)
         @st = ::SDL::AudioSpec.new
         @st[:channels] = channels
         @st[:format] = format || 0 |
           (big_endian ? SDL_AUDIO_MASK_ENDIAN : 0) |
-          (bit_size & SDL_AUDIO_MASK_BITSIZE) |
+          (bitsize & SDL_AUDIO_MASK_BITSIZE) |
           (float ? SDL_AUDIO_MASK_DATATYPE & SDL_AUDIO_MASK_SIGNED : 0) |
           (signed ? SDL_AUDIO_MASK_SIGNED : 0)
         @st[:freq] = frequency

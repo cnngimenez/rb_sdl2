@@ -31,9 +31,8 @@ module RbSDL2
 
       attr_reader :spec
 
-      require 'forwardable'
-      extend Forwardable
-      def_delegators :spec, *%i(channels format frequency)
+      require_relative 'audio_spec_reader'
+      include AudioSpecReader
 
       def to_ptr = @ptr
 
