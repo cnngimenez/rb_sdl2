@@ -1,5 +1,17 @@
 module RbSDL2
   module SDL
+    SDL_INIT_TIMER          = 0x00000001
+    SDL_INIT_AUDIO          = 0x00000010
+    SDL_INIT_VIDEO          = 0x00000020
+    SDL_INIT_JOYSTICK       = 0x00000200
+    SDL_INIT_HAPTIC         = 0x00001000
+    SDL_INIT_GAMECONTROLLER = 0x00002000
+    SDL_INIT_EVENTS         = 0x00004000
+    SDL_INIT_SENSOR         = 0x00008000
+
+    SDL_INIT_EVERYTHING = SDL_INIT_TIMER | SDL_INIT_AUDIO | SDL_INIT_VIDEO | SDL_INIT_EVENTS |
+      SDL_INIT_JOYSTICK | SDL_INIT_HAPTIC | SDL_INIT_GAMECONTROLLER | SDL_INIT_SENSOR
+
     class << self
       # SDL を初期化します。
       # flags に起動したい SDL サブシステムのシンボルで指定します。
@@ -24,18 +36,18 @@ module RbSDL2
       private def to_num(*flags)
         flags.inject(0) { |num, sym|
           num | case sym
-                when :audio then ::SDL::INIT_AUDIO
-                when :events then ::SDL::INIT_EVENTS
-                when :game_controller then ::SDL::INIT_GAMECONTROLLER
-                when :haptic then ::SDL::INIT_HAPTIC
-                when :joystick then ::SDL::INIT_JOYSTICK
-                when :sensor then ::SDL::INIT_SENSOR
-                when :timer then ::SDL::INIT_TIMER
-                when :video then ::SDL::INIT_VIDEO
+                when :audio then SDL_INIT_AUDIO
+                when :events then SDL_INIT_EVENTS
+                when :game_controller then SDL_INIT_GAMECONTROLLER
+                when :haptic then SDL_INIT_HAPTIC
+                when :joystick then SDL_INIT_JOYSTICK
+                when :sensor then SDL_INIT_SENSOR
+                when :timer then SDL_INIT_TIMER
+                when :video then SDL_INIT_VIDEO
                 else
                   raise ArgumentError, "Invalid sub system name(#{sym})"
                 end
-        }.nonzero? || ::SDL::INIT_EVERYTHING
+        }.nonzero? || SDL_INIT_EVERYTHING
       end
 
       # SDL String(C String, UTF-8) を Ruby String へ変換します。
