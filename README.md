@@ -3,7 +3,7 @@
 RbSDL2 は [SDL](https://www.libsdl.org) (Simple DirectMedia Layer) の機能を
 Ruby オブジェクトとして提供します。
 
-SDL 2.0.16 移行を対象としています。この Gem には SDL は含まれていません。
+SDL 2.0.22 以降を対象としています。この Gem には SDL は含まれていません。
 利用する際は環境に合わせて SDL を用意してください。
 
 ## Description
