@@ -4,6 +4,7 @@ module RbSDL2
 
     require_relative 'accessor'
     require_relative 'display'
+    require_relative 'flash'
     require_relative 'shape'
     require_relative 'state'
 
@@ -60,21 +61,20 @@ module RbSDL2
       end
     end
 
-    include Accessor, Display, Shape, State
+    include Accessor, Display, Flash, Shape, State
 
     def initialize(num)
       @window_id = num
     end
 
     def ==(other)
-      # ウィンドウのポインターは使いまわされている。最初に window_id を比較しなければならない。
+      # ウィンドウのポインターアドレスは SDL によって再利用されることがある。
+      # 最初に window_id を比較しなければならない。
       other.respond_to?(:window_id) && other.window_id == window_id ||
         other.respond_to?(:to_ptr) && other.to_ptr == to_ptr
     end
 
-    def destroy
-      ::SDL.DestroyWindow(self) unless destroyed?
-    end
+    def destroy = ::SDL.DestroyWindow(::SDL.GetWindowFromID(@window_id))
 
     def destroyed? = ::SDL.GetWindowFromID(@window_id).null?
 
@@ -82,19 +82,6 @@ module RbSDL2
 
     require_relative "../pixel_format_enum"
     include PixelFormatEnum
-
-    def flash(bool = true)
-      operation = bool ? ::SDL::FLASH_UNTIL_FOCUSED : ::SDL::FLASH_CANCEL
-      err = ::SDL.FlashWindow(self, operation)
-      raise RbSDL2Error if err < 0
-      bool
-    end
-
-    def flash!
-      err = ::SDL.FlashWindow(self, ::SDL::FLASH_BRIEFLY)
-      raise RbSDL2Error if err < 0
-      self
-    end
 
     require_relative 'hit_test'
 
