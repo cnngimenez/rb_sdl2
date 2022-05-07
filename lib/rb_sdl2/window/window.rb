@@ -1,6 +1,11 @@
 module RbSDL2
   class Window
-    require_relative 'window_flags'
+    SDL_WINDOWPOS_CENTERED_MASK = 0x2FFF0000
+
+    require_relative 'accessor'
+    require_relative 'display'
+    require_relative 'shape'
+    require_relative 'state'
 
     class << self
       def keyboard_focused = (ptr = ::SDL.GetKeyboardFocus).null? ? nil : to_ptr(ptr)
@@ -9,11 +14,10 @@ module RbSDL2
 
       def grabbed = (ptr = ::SDL.GetGrabbedWindow).null? ? nil : to_ptr(ptr)
 
-      def new(title = "", x = nil, y = nil, w = 640, h = 480, flags = nil, **opts)
-        x ||= ::SDL::WINDOWPOS_CENTERED_MASK
-        y ||= ::SDL::WINDOWPOS_CENTERED_MASK
-        flags ||= WindowFlags.to_num(**opts)
-        ptr = ::SDL.CreateWindow(SDL.str_to_sdl(title), x, y, w, h, flags)
+      def new(title = "", x = nil, y = nil, w = 640, h = 480, flags: nil, **opts)
+        ptr = ::SDL.CreateWindow(SDL.str_to_sdl(title),
+                                 x || SDL_WINDOWPOS_CENTERED_MASK, y || SDL_WINDOWPOS_CENTERED_MASK,
+                                 w, h, flags || State.to_flags(**opts))
         raise RbSDL2Error if ptr.null?
         to_ptr(ptr)
       end
@@ -23,19 +27,19 @@ module RbSDL2
       # shape には Surface のインスタンス・オブジェクトを与える。
       # 作成されたウィンドウは透明である。表示内容は作成後に描画する必要がある。
       # ウィンドウへの操作を扱いたければ HitTest コールバックを設定しコールバック側で処理を行う必要がある。
-      def shaped(title = "", x = nil, y = nil, w = nil, h = nil, flags = nil,
+      def shaped(title = "", x = nil, y = nil, w = nil, h = nil, flags: nil,
                  alpha_test: nil, color_key: nil, shape:, **opts)
-        flags ||= WindowFlags.to_num(**opts)
         size = [w || shape.w, h || shape.h]
         # w, h は形状マスクのサイズに合わせる必要がある。
-        ptr = ::SDL.CreateShapedWindow(SDL.str_to_sdl(title), 0, 0, *size, flags)
+        ptr = ::SDL.CreateShapedWindow(SDL.str_to_sdl(title), 0, 0, *size,
+                                       flags || State.to_flags(**opts))
         raise RbSDL2Error if ptr.null?
         to_ptr(ptr).tap do |obj|
           obj.shape_set(shape, alpha_test: alpha_test, color_key: color_key)
           obj.size = size
           # CreateShapedWindow は引数 x, y を無視する。そして x = -1000, y = -1000 に強制する。
           # 位置の再指定を行いアプリケーションの意図した位置に表示する。
-          obj.position = [x || ::SDL::WINDOWPOS_CENTERED_MASK, y || ::SDL::WINDOWPOS_CENTERED_MASK]
+          obj.position = [x || SDL_WINDOWPOS_CENTERED_MASK, y || SDL_WINDOWPOS_CENTERED_MASK]
         end
       end
 
@@ -56,6 +60,8 @@ module RbSDL2
       end
     end
 
+    include Accessor, Display, Shape, State
+
     def initialize(num)
       @window_id = num
     end
@@ -66,21 +72,11 @@ module RbSDL2
         other.respond_to?(:to_ptr) && other.to_ptr == to_ptr
     end
 
-    require_relative 'accessor'
-    require_relative 'display'
-    require_relative 'shape'
-    require_relative 'state'
-    include Accessor, Display, Shape, State
-
     def destroy
       ::SDL.DestroyWindow(self) unless destroyed?
     end
 
     def destroyed? = ::SDL.GetWindowFromID(@window_id).null?
-
-    def flags = ::SDL.GetWindowFlags(self)
-
-    include WindowFlags
 
     def format = ::SDL.GetWindowPixelFormat(self)
 

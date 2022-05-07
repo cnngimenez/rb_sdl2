@@ -1,5 +1,16 @@
 module RbSDL2
   class Window
+    SDL_HITTEST_NORMAL             = 0
+    SDL_HITTEST_DRAGGABLE          = 1
+    SDL_HITTEST_RESIZE_TOPLEFT     = 2
+    SDL_HITTEST_RESIZE_TOP         = 3
+    SDL_HITTEST_RESIZE_TOPRIGHT    = 4
+    SDL_HITTEST_RESIZE_RIGHT       = 5
+    SDL_HITTEST_RESIZE_BOTTOMRIGHT = 6
+    SDL_HITTEST_RESIZE_BOTTOM      = 7
+    SDL_HITTEST_RESIZE_BOTTOMLEFT  = 8
+    SDL_HITTEST_RESIZE_LEFT        = 9
+
     class HitTest < ::FFI::Function
       # proc には引数を１つ取るコーラブル・オブジェクトを与えます。
       # コーラブル・オブジェクトの引数に与えられる値はウィンドウのクリックされた位置を表す配列（[x, y]）です。

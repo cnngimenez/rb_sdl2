@@ -78,9 +78,9 @@ module RbSDL2
 
       def position=(x_y)
         wx, wy = x_y
-        wx ||= ::SDL::WINDOWPOS_CENTERED_MASK
-        wy ||= ::SDL::WINDOWPOS_CENTERED_MASK
-        ::SDL.SetWindowPosition(self, wx, wy)
+        ::SDL.SetWindowPosition(self,
+                                wx || SDL_WINDOWPOS_CENTERED_MASK,
+                                wy || SDL_WINDOWPOS_CENTERED_MASK)
       end
 
       def size
