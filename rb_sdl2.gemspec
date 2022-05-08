@@ -2,7 +2,7 @@
 
 Gem::Specification.new do |spec|
   spec.name          = "rb_sdl2"
-  spec.version       = "0.1.2"
+  spec.version       = "0.2.0"
   spec.author        = "shinokaro"
   spec.email         = "shinokaro@hotmail.co.jp"
 
@@ -22,6 +22,6 @@ Gem::Specification.new do |spec|
     `git ls-files -z`.split("\x0").reject { |f| f.match(%r{\A(?:test|spec|features)/}) }
   end
 
-  spec.add_dependency "ffi", ">= 1.15.0"
-  spec.add_dependency "sdl2-bindings", ">= 0.1.1"
+  spec.add_dependency "ffi", "~> 1.15"
+  spec.add_dependency "sdl2-bindings", "~> 0.1.1"
 end
