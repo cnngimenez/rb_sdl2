@@ -13,10 +13,18 @@ module RbSDL2
     require_relative 'event_filter'
     def_single_delegators EventFilter, *%i(define_watch filter_callback_defined? undefine_watch)
 
-    require_relative 'event_queue'
-    def_single_delegators EventQueue, *%i(clear exist? poll pump wait)
+    require_relative 'pump'
+    def_single_delegators Pump, *%i(poll pump wait)
+
+    require_relative 'queue'
 
     class << self
+      def clear = Queue.new.clear
+
+      def count = Queue.new.size
+
+      def exist?(type = nil) = !Queue.new(type).empty?
+
       def quit?
         pump
         exist?(::SDL::QUIT)

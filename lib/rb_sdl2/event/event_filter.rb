@@ -7,19 +7,16 @@ module RbSDL2
       def call(_id) = ::SDL.DelEventWatch(@obj, nil)
     end
 
-    @watches = []
-
     class << self
       def define_watch(func)
         ::SDL.AddEventWatch(func, nil)
-        @watches << func.__id__
-        ptr = ::FFI::Pointer.new(func.address)
-        ObjectSpace.define_finalizer(func, Releaser.new(ptr))
+        # ::FFI::Function の to_ptr が戻すオブジェクトは親オブジェクトとリンクしている。
+        # ファイナライザーへ渡す際に再度ポインターを作り直して関係を切る。
+        ObjectSpace.define_finalizer(func, Releaser.new(::FFI::Pointer.new(func.address)))
       end
 
       def undefine_watch(func)
-        func_id = func.__id__
-        @watches.delete_if { |id| (id == func_id).tap { ::SDL.DelEventWatch(func, nil) } }
+        ::SDL.DelEventWatch(func, nil)
         ObjectSpace.undefine_finalizer(func)
       end
 
