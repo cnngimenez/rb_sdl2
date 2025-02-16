@@ -39,7 +39,7 @@ window = Window.new("Title")
 window.update { |s| s.blit(image) } # Window へ画像を描画します。
 
 RbSDL2.loop do
-  break if Event.quit? # ユーザがウィンドウを閉じたことを検出します。
+  break if Event.quit? || Keyboard.key?("Escape") # ユーザがウィンドウを閉じたことを検出します。
   # キーボードの A キーを押したか調べます。押していればダイアログボックスを表示します。
   window.info_alert("Message") if Keyboard.key?("A")
   # マウスのボタン（種類問わず）を押したか調べます。押していればダイアログボックスを表示します。
