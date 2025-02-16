@@ -34,7 +34,7 @@ module RbSDL2
       #
       # 戻り値は押されたボタン番号か nil です。
       # nil になる場合はこのウィンドウがアクティブな時に表示中にエスケープキーが押された場合です。
-      def show(level, message = nil, title = nil, window = nil, buttons: nil, default: nil)
+      def show(level, message = '', title = '', window = nil, buttons: nil, default: nil)
         # アンダーバーのついた変数はオブジェクトをスコープ中に保持するためにある。
         data = ::SDL::MessageBoxData.new
         data[:flags] = level
@@ -75,7 +75,7 @@ module RbSDL2
       # シンプルなメッセージウィンドウを開きます。
       # MessageBox.show の簡易版です。ボタン一つのウィンドウが表示されます。
       # 戻り値は常に true です。
-      def simple(level, message = nil, title = nil, window = nil)
+      def simple(level, message = '', title = '', window = nil)
         err = ::SDL.ShowSimpleMessageBox(level,
                                          SDL.str_to_sdl(title),
                                          SDL.str_to_sdl(message),
