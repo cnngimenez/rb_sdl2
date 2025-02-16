@@ -45,16 +45,16 @@ module RbSDL2
 
     def show_cursor = Cursor.show
 
-    def confirm(message) = MessageBox.show(0, message, 'Confirm', buttons: %w(Cancel OK), default: 1) == 1
+    def confirm(message, window = nil) = MessageBox.show(0, message, 'Confirm', buttons: %w(Cancel OK), default: 1) == 1
     alias confirm? confirm
 
-    def alert(message) = MessageBox.simple(0, message, 'Alert')
+    def alert(message, window = nil) = MessageBox.simple(0, message, 'Alert')
 
-    def error_alert(message) = MessageBox.simple(MessageBox::ERROR, message, 'Error')
+    def error_alert(message, window = nil) = MessageBox.simple(MessageBox::ERROR, message, 'Error')
 
-    def info_alert(message) = MessageBox.simple(MessageBox::INFO, message, 'Info')
+    def info_alert(message, window = nil) = MessageBox.simple(MessageBox::INFO, message, 'Info')
 
-    def warn_alert(message) = MessageBox.simple(MessageBox::WARN, message, 'Warning')
+    def warn_alert(message, window = nil) = MessageBox.simple(MessageBox::WARN, message, 'Warning')
 
     def load(path)
       ::SDL.load_lib(path)

@@ -145,5 +145,17 @@ module RbSDL2
 
     attr_reader :window_id
     alias id window_id
+
+    def confirm(message) = RbSDL2.confirm(message, self)
+    alias confirm? confirm
+
+    def alert(message) = RbSDL2.alert(message, self)
+
+    def error_alert(message) = RbSDL2.error_alert(message, self)
+
+    def info_alert(message) = RbSDL2.info_alert(message, self)
+
+    def warn_alert(message) = RbSDL2.warn_alert(message, self)
+
   end
 end
