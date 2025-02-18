@@ -33,7 +33,7 @@ module RbSDL2
       def to_str = @ptr.read_bytes(size)
 
       # 現在キーボードの押されている全てのキーに対応するスキャンコードを配列で戻します。
-      def to_a = to_str.bytes.with_index.inject([]) { |a, (n, i)| n == ::SDL::PRESSED ? a << i : a }
+      def to_a = to_str.bytes.to_enum.with_index.inject([]) { |a, (n, i)| n == ::SDL::PRESSED ? a << i : a }
     end
   end
 end
